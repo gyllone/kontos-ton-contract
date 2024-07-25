@@ -64,6 +64,9 @@
     "resolveJsonModule": true
   },
   "include": [
-    "sources/**/*"
+    "sources/**/*",
+    "output",
+    "scripts/**/*",
+    "tests/**/*",
   ]
 }

@@ -1,10 +1,16 @@
 {
-    "projects": [{
-        "name": "sample",
-        "path": "./sources/contract.tact",
-        "output": "./sources/output",
-        "options":{
-            
+    "projects": [
+        {
+            "name": "contract",
+            "path": "./sources/contract.tact",
+            "output": "./output",
+            "options": {
+                "debug": false,
+                "external": true,
+                "experimental": {
+                  "inline": true
+                }
+            }
         }
-    }]
+    ]
 }

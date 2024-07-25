@@ -1,0 +1,17 @@
+
+
+int get_compute_fee(int workchain, int gas_used) asm(gas_used workchain) "GETGASFEE";
+
+int send_message(cell msg, int mode) impure asm "SENDMSG";
+
+int gas_consumed() asm "GASCONSUMED";
+
+;;; Check secp256r1 signature of a hash data
+;;; Refer to https://docs.ton.org/learn/tvm-instructions/tvm-upgrade-2023-07#secp256r1
+;;; Returns `true` or `false`.
+int check_p256_signature(int hash, slice signature, slice public_key) asm "P256_CHKSIGNU";
+
+;;; Check secp256r1 signature for raw data
+;;; Refer to https://docs.ton.org/learn/tvm-instructions/tvm-upgrade-2023-07#secp256r1
+;;; Returns `true` or `false`.
+int check_data_p256_signature(slice data, slice signature, slice public_key) asm "P256_CHKSIGNS";
