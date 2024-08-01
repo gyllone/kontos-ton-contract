@@ -7,6 +7,29 @@ message Upgrade {
     code: Cell;
 }
 
+// === Entrypoint ===
+
+message ValidateJettonTransfer {
+    gas: Int as uint64;
+    fwd_fee: Int as coins;
+    jetton_wallet: Address;
+    from: Address;
+    payload: Slice as remaining;
+}
+
+message ExecutionReceipt {
+    gas: Int as uint64;
+    fwd_fee: Int as coins;
+}
+
+message HandleOps {
+    ops: Slice as remaining;
+}
+
+message ConfirmBroker {
+    broker: Address;
+}
+
 // === Light client ===
 
 message UpdateBlockHeaders {
@@ -15,25 +38,47 @@ message UpdateBlockHeaders {
 
 // === Smart Account ===
 
+message PrePay {
+    gas: Int as uint64;
+    forward_fee: Int as coins;
+    receiver_pubkey: Slice;
+    amount: Int as coins;
+    payload: Slice as remaining;
+}
+
+message JettonPrePay {
+    gas: Int as uint64;
+    fee: Int as coins;
+    destination: Address;
+    ton_amount: Int as coins;
+    payload: Cell;
+    jetton_payload: Slice as remaining;
+}
+
+message Execute {
+    gas: Int as uint64;
+    forward_fee: Int as coins;
+    from_pubkey: Slice;
+    payload: Slice as remaining;
+}
+
+message ExecuteByEntrypoint {
+    gas: Int as uint64;
+    forward_fee: Int as coins;
+    payload: Slice as remaining;
+}
+
 message BatchExecuteByEOA {
     messages: Slice as remaining;
 }
 
 message BatchExecuteByEntrypoint {
-    nonce: Int;
+    nonce: Int as uint64;
     signature: Slice;
-    jetton_message: Cell;
-    jetton_fee: Int as coins;
-    user_borne: Int as coins; 
-    target_messages: Slice as remaining;
-}
-
-message ExecuteByEntrypoint {
     broker: Address;
-    nonce: Int;
-    signature: Slice;
-    jetton_msg: JettonMessage;
-    main_msg: MainMessage;
+    user_borne: Int as coins; 
+    jetton_message: Cell;
+    target_messages: Slice as remaining;
 }
 
 message UpdatePubkey {
