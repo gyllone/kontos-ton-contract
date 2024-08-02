@@ -156,10 +156,11 @@ trait SmartAccount {
         }
         msg.jetton_payload.endParse();
 
-        let gas_1: Int = gasConsumed();
-
         let contract_address: Address = myAddress();
         let ton_amount: Int = jetton_fee + msg.ton_amount;
+
+        let gas_1: Int = gasConsumed();
+
         let forward_payload: Slice = beginCell()
             .storeUint(msg.gas, 64)
             .storeCoins(msg.fee)
@@ -184,11 +185,11 @@ trait SmartAccount {
 
         let gas_2: Int = gasConsumed();
         let fee: Int = msg.fee + jetton_fee + estimate_forward_fee(transfer_msg, SendPayGasSeparately);
-        let gas_consumption: Int = msg.gas - gas_0 + (gas_2 - gas_1);
-        gas_consumption += gasConsumed();
+        let gas: Int = msg.gas - gas_0 + (gas_2 - gas_1);
+        gas += gasConsumed();
 
         forward_payload = beginCell()
-            .storeUint(gas_consumption, 64)
+            .storeUint(gas, 64)
             .storeCoins(fee)
             .storeRef(msg.payload)
             .asSlice();
@@ -208,27 +209,94 @@ trait SmartAccount {
             null,
             null,
         );
-        nativeSendMessage(exec_msg, SendPayGasSeparately);
+        nativeSendMessage(transfer_msg, SendPayGasSeparately);
     }
 
-    receive(msg: Execute) {
+    receive(msg: JettonTransferNotification) {
+        let gas_0: Int = gasConsumed();
+
+        let contract_address: Address = myAddress();
+        let to_jetton_wallet: Address = sender();
+
+        let gas: Int = msg.forward_payload.loadUint(64);
+        let fee: Int = msg.forward_payload.loadCoins();
+        let payload: Cell = msg.forward_payload.loadRef();
+
+        let gas_1: Int = gasConsumed();
+
+        let validate_msg: Cell = pack_message(
+            false,
+            self.entrypoint,
+            0,
+            ValidateJettonTransfer {
+                gas: 0,
+                fee: 0,
+                from: msg.from,
+                to: contract_address,
+                to_jetton_wallet: to_jetton_wallet,
+                payload: payload
+            }.toCell(),
+            null,
+            null,
+        );
+
+        let gas_2: Int = gasConsumed();
+        fee += estimate_forward_fee(validate_msg, SendRemainingValue);
+        gas += (gas_2 - gas_1) - gas_0;
+        gas += gasConsumed();
+
+        validate_msg = pack_message(
+            false,
+            self.entrypoint,
+            0,
+            ValidateJettonTransfer {
+                gas: gas,
+                fee: fee,
+                from: msg.from,
+                to: contract_address,
+                to_jetton_wallet: to_jetton_wallet,
+                payload: payload
+            }.toCell(),
+            null,
+            null,
+        );
+        nativeSendMessage(validate_msg, SendRemainingValue);
+    }
+
+    receive(msg: ExecuteBySmartAccount) {
         let gas_0: Int = gasConsumed();
 
         self.require_smart_account(msg.from_pubkey);
 
-        let to: Address = msg.payload.loadAddress();
-        let value: Int = msg.payload.loadCoins();
+        self.execute(gas_0, msg.gas, msg.fee, msg.payload);
+    }
+
+    receive(msg: ExecuteByEntrypoint) {
+        let gas_0: Int = gasConsumed();
+
+        self.require_entrypoint();
+
+        self.execute(gas_0, msg.gas, msg.fee, msg.payload);   
+    }
+
+    receive(msg: JettonExcesses) {
+        // receive excess TON
+    }
+
+    fun execute(gas_0: Int, gas: Int, fee: Int, payload: Slice) {
+        let to: Address = payload.loadAddress();
+        let value: Int = payload.loadCoins();
         let body: Cell? = null;
-        if (msg.payload.loadBool()) {
-            body = msg.payload.loadRef();
+        if (payload.loadBool()) {
+            body = payload.loadRef();
         }
         let code: Cell? = null;
-        if (msg.payload.loadBool()) {
-            code = msg.payload.loadRef();
+        if (payload.loadBool()) {
+            code = payload.loadRef();
         }
         let data: Cell? = null;
-        if (msg.payload.loadBool()) {
-            data = msg.payload.loadRef();
+        if (payload.loadBool()) {
+            data = payload.loadRef();
         }
 
         let main_msg: Cell = pack_message(
@@ -248,136 +316,27 @@ trait SmartAccount {
             false,
             self.entrypoint,
             0,
-            ExecutionReceipt { gas: 0, fwd_fee: 0 }.toCell(),
+            ExecutionReceipt { gas: 0, fee: 0 }.toCell(),
             null,
             null,
         );
 
         let gas_2: Int = gasConsumed();
-        let fwd_fee: Int = msg.forward_fee
-            + estimate_forward_fee(main_msg, SendPayGasSeparately)
+        fee += estimate_forward_fee(main_msg, SendPayGasSeparately)
             + estimate_forward_fee(receipt_msg, SendPayGasSeparately);
-        let gas_consumption: Int = msg.gas - gas_0 + (gas_2 - gas_1);
-        gas_consumption += gasConsumed();
+        gas += (gas_2 - gas_1) - gas_0;
+        gas += gasConsumed();
 
         receipt_msg = pack_message(
             false,
             self.entrypoint,
             0,
-            ExecutionReceipt { gas: gas_comsumption, fwd_fee: fwd_fee }.toCell(),
+            ExecutionReceipt { gas: gas, fee: fee }.toCell(),
             null,
             null,
         );
         // send the receipt message
         nativeSendMessage(receipt_msg, SendPayGasSeparately);
-    }
-
-    receive(msg: ExecuteByEntrypoint) {
-        let gas_start: Int = gasConsumed();
-
-        self.require_entrypoint();
-
-        let to: Address = msg.payload.loadAddress();
-        let value: Int = msg.payload.loadCoins();
-        let body: Cell? = null;
-        if (msg.payload.loadBool()) {
-            body = msg.payload.loadRef();
-        }
-        let code: Cell? = null;
-        if (msg.payload.loadBool()) {
-            code = msg.payload.loadRef();
-        }
-        let data: Cell? = null;
-        if (msg.payload.loadBool()) {
-            data = msg.payload.loadRef();
-        }
-
-        let exec_msg: Cell = pack_message(
-            false,
-            to,
-            value,
-            body,
-            code,
-            data,
-        );
-        // send the execution message
-        nativeSendMessage(exec_msg, SendPayGasSeparately);
-
-        let gas_mid: Int = gasConsumed();
-
-        let receipt_msg: Cell = pack_message(
-            false,
-            self.entrypoint,
-            0,
-            ExecutionReceipt { gas: 0, fwd_fee: 0 }.toCell(),
-            null,
-            null,
-        );
-
-        let gas_end: Int = gasConsumed();
-        let fwd_fee: Int = estimate_forward_fee(exec_msg, SendPayGasSeparately)
-            + estimate_forward_fee(receipt_msg, SendPayGasSeparately);
-        let gas_comsumption: Int = gas_end - gas_start + (gas_end - gas_mid);
-
-        receipt_msg = pack_message(
-            false,
-            self.entrypoint,
-            0,
-            ExecutionReceipt {
-                gas: msg.gas + gas_comsumption,
-                fwd_fee: msg.fwd_fee + fwd_fee
-            }.toCell(),
-            null,
-            null,
-        );
-        // send the receipt message
-        nativeSendMessage(receipt_msg, SendPayGasSeparately);
-    }
-
-    receive(msg: JettonTransferNotification) {
-        let gas_start: Int = gasConsumed();
-
-        let contract_address: Address = myAddress();
-        let jetton_wallet: Address = sender();
-        let fwd_msg: Cell = pack_message(
-            false,
-            self.entrypoint,
-            0,
-            ValidateJettonTransfer {
-                gas: 0,
-                fwd_fee: 0,
-                from: msg.from,
-                to: contract_address,
-                jetton_wallet: jetton_wallet,
-                payload: msg.forward_payload
-            }.toCell(),
-            null,
-            null,
-        );
-
-        let gas_comsumption: Int = gasConsumed() - gas_start;
-        let fwd_fee: Int = estimate_forward_fee(fwd_msg, SendRemainingValue);
-
-        // rebuilt the message with forward fee and gas consumption
-        fwd_msg = pack_message(
-            false,
-            self.entrypoint,
-            0,
-            ValidateJettonTransfer {
-                gas: gas_comsumption * 2,
-                fwd_fee: fwd_fee,
-                jetton_wallet: msg.from,
-                from: msg.from,
-                payload: msg.forward_payload,
-            }.toCell(),
-            null,
-            null,
-        );
-        nativeSendMessage(fwd_msg, SendRemainingValue);
-    }
-
-    receive(msg: JettonExcesses) {
-        // receive excess TON
     }
 
     fun process_jetton_transfer_result(broker: Address, payload: Slice): TransferResult {
@@ -444,34 +403,20 @@ trait SmartAccount {
         require(sender() == self.entrypoint, "Invalid sender");
     }
 
-    inline fun require_eoa_owner() {
-        let from: Address = sender();
-        require(
-            from == self.eoa_owner || self.external_owners.get(from) == true,
-            "Invalid sender",
-        );
-    }
-
-    inline fun require_locked() {
-        require(
-            self.broker != null && self.jetton_wallet != null && self.message != null,
-            "Unlocked",
-        );
-    }
-
-    inline fun require_unlocked() {
-        require(
-            self.broker == null && self.jetton_wallet == null && self.message == null,
-            "Locked",
-        );
-    }
-
     inline fun require_jetton_wallet() {
         require(sender() == self.jetton_wallet!!, "Invalid sender");
     }
 
     inline fun require_smart_account(pubkey: Slice) {
         require(sender() == self.get_smart_account_address(pubkey), "Invalid sender");
+    }
+
+    inline fun require_eoa_owner() {
+        let from: Address = sender();
+        require(
+            from == self.eoa_owner || self.external_owners.get(from) == true,
+            "Invalid sender",
+        );
     }
 
     inline fun get_smart_account_address(pubkey: Slice): Address {

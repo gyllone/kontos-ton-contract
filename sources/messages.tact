@@ -11,15 +11,16 @@ message Upgrade {
 
 message ValidateJettonTransfer {
     gas: Int as uint64;
-    fwd_fee: Int as coins;
-    jetton_wallet: Address;
+    fee: Int as coins;
     from: Address;
+    to: Address;
+    to_jetton_wallet: Address;
     payload: Slice as remaining;
 }
 
 message ExecutionReceipt {
     gas: Int as uint64;
-    fwd_fee: Int as coins;
+    fee: Int as coins;
 }
 
 message HandleOps {
@@ -55,16 +56,16 @@ message JettonPrePay {
     jetton_payload: Slice as remaining;
 }
 
-message Execute {
+message ExecuteBySmartAccount {
     gas: Int as uint64;
-    forward_fee: Int as coins;
+    fee: Int as coins;
     from_pubkey: Slice;
     payload: Slice as remaining;
 }
 
 message ExecuteByEntrypoint {
     gas: Int as uint64;
-    forward_fee: Int as coins;
+    fee: Int as coins;
     payload: Slice as remaining;
 }
 
