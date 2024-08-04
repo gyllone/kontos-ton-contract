@@ -1,6 +1,4 @@
 
-import "./types";
-
 // === General ===
 
 message Upgrade {
@@ -9,26 +7,30 @@ message Upgrade {
 
 // === Entrypoint ===
 
+message SetAdminPubkey {
+    pubkey: Int as uint256;
+}
+
+message HandleOpWithPrePay {
+    broker_pubkey: Cell;
+    user_pubkey: Cell;
+    amount: Int as coins;
+    exec_payload: Slice as remaining;
+}
+
+message HandleOpWithJettonPrePay {
+    broker_pubkey: Cell;
+    user_pubkey: Cell;
+    ton_amount: Int as coins;
+    jetton_payload: Cell;
+    exec_payload: Slice as remaining;
+}
+
 message ValidateJettonTransfer {
-    gas: Int as uint64;
-    fee: Int as coins;
-    from: Address;
-    to: Address;
-    to_jetton_wallet: Address;
-    payload: Slice as remaining;
-}
-
-message ExecutionReceipt {
-    gas: Int as uint64;
-    fee: Int as coins;
-}
-
-message HandleOps {
-    ops: Slice as remaining;
-}
-
-message ConfirmBroker {
-    broker: Address;
+    broker_pubkey: Cell;
+    user_pubkey: Cell;
+    jetton_wallet: Address;
+    exec_payload: Slice as remaining;
 }
 
 // === Light client ===
@@ -40,50 +42,47 @@ message UpdateBlockHeaders {
 // === Smart Account ===
 
 message PrePay {
-    gas: Int as uint64;
-    forward_fee: Int as coins;
-    receiver_pubkey: Slice;
+    executor: Address;
+    executor_fee: Int as coins;
+    user_pubkey: Cell;
     amount: Int as coins;
-    payload: Slice as remaining;
+    exec_payload: Slice as remaining;
 }
 
 message JettonPrePay {
-    gas: Int as uint64;
-    fee: Int as coins;
-    destination: Address;
+    executor: Address;
+    executor_fee: Int as coins;
+    user_pubkey: Cell;
     ton_amount: Int as coins;
-    payload: Cell;
-    jetton_payload: Slice as remaining;
+    jetton_payload: Cell;
+    exec_payload: Slice as remaining;
 }
 
-message ExecuteBySmartAccount {
-    gas: Int as uint64;
-    fee: Int as coins;
-    from_pubkey: Slice;
-    payload: Slice as remaining;
+message CheckDeployment {
+    broker_pubkey: Cell;
+    ton_amount: Int as coins;
+    jetton_payload: Cell;
+    exec_payload: Slice as remaining;
 }
 
-message ExecuteByEntrypoint {
-    gas: Int as uint64;
-    fee: Int as coins;
-    payload: Slice as remaining;
+message JettonPrePayInternal {
+    user_pubkey: Cell;
+    ton_amount: Int as coins;
+    jetton_payload: Cell;
+    exec_payload: Slice as remaining;
 }
 
-message BatchExecuteByEOA {
-    messages: Slice as remaining;
+message Execute {
+    broker_pubkey: Cell;
+    exec_payload: Slice as remaining;
 }
 
-message BatchExecuteByEntrypoint {
-    nonce: Int as uint64;
-    signature: Slice;
-    broker: Address;
-    user_borne: Int as coins; 
-    jetton_message: Cell;
-    target_messages: Slice as remaining;
+message ExecuteByEOA {
+    exec_payload: Slice as remaining;
 }
 
 message UpdatePubkey {
-    pubkey: Slice;
+    pubkey: Cell;
 }
 
 // === Jetton Wallet ===

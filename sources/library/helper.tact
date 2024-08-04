@@ -53,3 +53,7 @@ fun pack_message(
 inline fun estimate_forward_fee(msg: Cell, flag: Int): Int {
     return sendMessage(msg, 1024 | flag);
 }
+
+inline fun compute_gas_fee(gas: Int): Int {
+    return getComputeFee(0, gas);
+}
