@@ -12,33 +12,34 @@ contract Entrypoint with BaseEntrypoint, Deployable {
     admin_pubkey: Int as uint256;
     broker_status: map<Address, Bool>;
     stranded_assets: map<Address, Int as coins>;
-    light_client: Address;
 
-    init(owner: Address, light_client: Address) {
+    init(owner: Address) {
         self.owner = owner;
         self.admin_pubkey = 0;
         self.broker_status = emptyMap();
         self.stranded_assets = emptyMap();
-        self.light_client = light_client;
     }
 
     override inline fun get_smart_account_init(pubkey: Cell): StateInit {
         return initOf SmartAccount(pubkey, myAddress());
+    }
+
+    override inline fun get_light_client_init(storage_index: Int): StateInit {
+        return initOf LightClient(myAddress(), storage_index);
     }
 }
 
 contract LightClient with BaseLightClient, Deployable {
     override const storageReserve: Int = ton("1.0");
 
-    owner: Address;
-
+    entrypoint: Address;
     storage_index: Int as uint64;
     kontos_sim_headers: map<Int as uint64, Int as uint256>;
     tip: Int as uint64;
 
-    init(owner: Address) {
-        self.owner = owner;
-        self.storage_index = 0;
+    init(entrypoint: Address, storage_index: Int) {
+        self.entrypoint = entrypoint;
+        self.storage_index = storage_index;
         self.kontos_sim_headers = emptyMap();
         self.tip = 0;
     }

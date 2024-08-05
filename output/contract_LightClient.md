@@ -1,6 +1,6 @@
 # TACT Compilation Report
 Contract: LightClient
-BOC Size: 1498 bytes
+BOC Size: 1362 bytes
 
 # Types
 Total Types: 24
@@ -50,8 +50,8 @@ TLB: `validate_jetton_transfer#46f0d6d1 broker_pubkey:^cell user_pubkey:^cell je
 Signature: `ValidateJettonTransfer{broker_pubkey:^cell,user_pubkey:^cell,jetton_wallet:address,exec_payload:remainder<slice>}`
 
 ## UpdateBlockHeaders
-TLB: `update_block_headers#30d159d9 payload:remainder<slice> = UpdateBlockHeaders`
-Signature: `UpdateBlockHeaders{payload:remainder<slice>}`
+TLB: `update_block_headers#790ea7b7 cashback:address payload:remainder<slice> = UpdateBlockHeaders`
+Signature: `UpdateBlockHeaders{cashback:address,payload:remainder<slice>}`
 
 ## PrePay
 TLB: `pre_pay#2365b470 executor:address executor_fee:coins user_pubkey:^cell amount:coins exec_payload:remainder<slice> = PrePay`
@@ -102,7 +102,7 @@ TLB: `change_owner_ok#327b2b4a queryId:uint64 newOwner:address = ChangeOwnerOk`
 Signature: `ChangeOwnerOk{queryId:uint64,newOwner:address}`
 
 # Get Methods
-Total Get Methods: 4
+Total Get Methods: 3
 
 ## get_storage_index
 
@@ -110,8 +110,6 @@ Total Get Methods: 4
 Argument: number
 
 ## get_tip
-
-## owner
 
 # Error Codes
 2: Stack underflow

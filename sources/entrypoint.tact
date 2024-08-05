@@ -12,7 +12,6 @@ trait BaseEntrypoint with OwnableTransferable {
     admin_pubkey: Int;
     broker_status: map<Address, Bool>;
     stranded_assets: map<Address, Int>;
-    light_client: Address;
 
     receive() {
         // receive ton
@@ -199,5 +198,12 @@ trait BaseEntrypoint with OwnableTransferable {
         return contractAddress(sinit);
     }
 
+    inline fun get_light_client_address(storage_index: Int): Address {
+        let sinit: StateInit = self.get_light_client_init(storage_index);
+        return contractAddress(sinit);
+    }
+
     abstract inline fun get_smart_account_init(pubkey: Cell): StateInit;
+
+    abstract inline fun get_light_client_init(storage_index: Int): StateInit;
 }

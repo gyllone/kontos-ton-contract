@@ -1,13 +1,11 @@
-import "@stdlib/ownable";
 import "./messages";
 
 
-trait BaseLightClient with OwnableTransferable {
+trait BaseLightClient {
 
     const MAX_LIGHT_HEADERS: Int = 5000;
 
-    owner: Address;
-
+    entrypoint: Address;
     storage_index: Int; 
     kontos_sim_headers: map<Int as uint64, Int as uint256>;
     tip: Int;
@@ -17,7 +15,7 @@ trait BaseLightClient with OwnableTransferable {
     }
 
     receive(msg: UpdateBlockHeaders) {
-        self.requireOwner();
+        self.require_entrypoint();
 
         let last_number: Int = 0;
         let min_number: Int = self.min_number();
@@ -33,6 +31,8 @@ trait BaseLightClient with OwnableTransferable {
         if (last_number > self.tip) {
             self.tip = last_number;
         }
+
+        self.forward(msg.cashback, null, false, null);
     }
 
     fun update_block_headers_payload(last_number: Int, min_number: Int, max_number: Int, payload: Slice): Int {
@@ -66,6 +66,10 @@ trait BaseLightClient with OwnableTransferable {
 
     inline fun max_number(): Int {
         return (self.storage_index + 1) * self.MAX_LIGHT_HEADERS;
+    }
+
+    inline fun require_entrypoint() {
+        require(sender() == self.entrypoint, "Invalid sender");
     }
 
     // === getters ===

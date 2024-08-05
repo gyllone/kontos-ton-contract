@@ -583,31 +583,36 @@ function dictValueParserValidateJettonTransfer(): DictionaryValue<ValidateJetton
 
 export type UpdateBlockHeaders = {
     $$type: 'UpdateBlockHeaders';
+    cashback: Address;
     payload: Cell;
 }
 
 export function storeUpdateBlockHeaders(src: UpdateBlockHeaders) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeUint(819026393, 32);
+        b_0.storeUint(2031003575, 32);
+        b_0.storeAddress(src.cashback);
         b_0.storeBuilder(src.payload.asBuilder());
     };
 }
 
 export function loadUpdateBlockHeaders(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 819026393) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 2031003575) { throw Error('Invalid prefix'); }
+    let _cashback = sc_0.loadAddress();
     let _payload = sc_0.asCell();
-    return { $$type: 'UpdateBlockHeaders' as const, payload: _payload };
+    return { $$type: 'UpdateBlockHeaders' as const, cashback: _cashback, payload: _payload };
 }
 
 function loadTupleUpdateBlockHeaders(source: TupleReader) {
+    let _cashback = source.readAddress();
     let _payload = source.readCell();
-    return { $$type: 'UpdateBlockHeaders' as const, payload: _payload };
+    return { $$type: 'UpdateBlockHeaders' as const, cashback: _cashback, payload: _payload };
 }
 
 function storeTupleUpdateBlockHeaders(source: UpdateBlockHeaders) {
     let builder = new TupleBuilder();
+    builder.writeAddress(source.cashback);
     builder.writeSlice(source.payload);
     return builder.build();
 }
@@ -1264,23 +1269,25 @@ function dictValueParserChangeOwnerOk(): DictionaryValue<ChangeOwnerOk> {
 
  type LightClient_init_args = {
     $$type: 'LightClient_init_args';
-    owner: Address;
+    entrypoint: Address;
+    storage_index: bigint;
 }
 
 function initLightClient_init_args(src: LightClient_init_args) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeAddress(src.owner);
+        b_0.storeAddress(src.entrypoint);
+        b_0.storeInt(src.storage_index, 257);
     };
 }
 
-async function LightClient_init(owner: Address) {
-    const __code = Cell.fromBase64('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');
-    const __system = Cell.fromBase64('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');
+async function LightClient_init(entrypoint: Address, storage_index: bigint) {
+    const __code = Cell.fromBase64('te6ccgECGwEABUYAART/APSkE/S88sgLAQIBYgIDAgLLBAUCASAPEALj0AdDTAwFxsKMB+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiFRQUwNvBPhhAvhi2zxVE9s88uCCyPhDAcx/AcoAVTBQQyDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFss/EvQAyz/J7VSFwYB76XLkGukwICgX0cw6Z/BAF11qKpbBKkQX0mpiVzIuHEK+XoB6f+TQCATQYOgmfoHN9DKAOuAmEkttvEQN1nPwLXLgJA3eWhAKAHdCXl6Rw4YC0AgKhAsQYOQt0qtrPotmExkAOeAoJn6IfEC8XRKkGulYQBFdC+BwA4C0AGSMH/gcCHXScIflTAg1wsf3iDAACLXScEhsJJbf+AgghB5Dqe3uo6zMNMfAYIQeQ6nt7ry4IH6QAEg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIIWwS2zx/4IIQlGqYtrrjAjBwBwgBSFUxgRFN+EJSUMcF8vRVIHAEIoETiKhVMCKkgROIqBBHEDZFBAkCmtMfAYIQlGqYtrry4IHTPwExyAGCEK/5D1dYyx/LP8n4QgFwbW1tIm6zmVsgbvLQgG8iAZEy4vhBbyQTXwP4J28QAaGCEDuaygC54w9/CwwC/Jcg10mBAUC+jmHTP4IAuutRVLYJUiC+k1MSuZFw4hXy9APT/yaAQCaDB0Ez9A5voZQB1wEwkltt4iBus5+Ba5cBIG7y0IBQA7oS8vSOHDAWgEBUIFiDByFulVtZ9FswmMgBzwFBM/RD4gXi6JUg10rCAIroXwNTAbyRMZEw4g4KAlpVA21wbW1tIm6zmVsgbvLQgG8iAZEy4vhBbyQTXwP4J28QAaGCEDuaygC54w8LDAHwghA7msoAcPsCECRwAwSBAIJQI8hxAcoBUAcBygBwAcoCUAUg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIzxZQA/oCcAHKaCNus5F/kyRus+KXMzMBcAHKAOMNIW6znH8BygABIG7y0IABzJUxcAHKAOLJAfsADQHcECRwAwSAQlAjyHEBygFQBwHKAHABygJQBSDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFlAD+gJwAcpoI26zkX+TJG6z4pczMwFwAcoA4w0hbrOcfwHKAAEgbvLQgAHMlTFwAcoA4skB+wANAJh/AcoAyHABygBwAcoAJG6znX8BygAEIG7y0IBQBMyWNANwAcoA4iRus51/AcoABCBu8tCAUATMljQDcAHKAOJwAcoAAn8BygACyVjMACTUAdAQSBA3RlhUd2jwGwjRVTMCASAREgIBIBMUATu6S12zxVA4BAIwKDB0Ez9A5voZQB1wEwkltt4mxBgXAQ+4j/2zwgbEGBcCAVgVFgIBSBkaAQ+w3fbPCJsQYBcAlbL0YJwXOw9XSyuex6E7DnWSoUbZoJwndY1LStkfLMi068t/fFiOYJwIFXAG4BnY5TOWDquRyWyw4JwnZdOWrNOy3M6DpZtlGbopIAHa7UTQ1AH4Y9IAAY4q+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAHTP/QE0z9VMGwU4Pgo1wsKgwm68uCJ+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAGBAQHXAFkC0QHbPBgABG1wABGwr7tRNDSAAGAAdbJu40NWlwZnM6Ly9RbWVvWENxdTVyS2ZCaUE5U0FKNlNaSHRiSldXRXA0TjV1anZvRTNKU0J2Y0Fjgg');
+    const __system = Cell.fromBase64('te6cckECHQEABVAAAQHAAQEFoXiDAgEU/wD0pBP0vPLICwMCAWIEEAICywUOAuPQB0NMDAXGwowH6QAEg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIVFBTA28E+GEC+GLbPFUT2zzy4ILI+EMBzH8BygBVMFBDINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiM8Wyz8S9ADLP8ntVIXBgLQAZIwf+BwIddJwh+VMCDXCx/eIMAAItdJwSGwklt/4CCCEHkOp7e6jrMw0x8BghB5Dqe3uvLggfpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IghbBLbPH/gghCUapi2uuMCMHAHCgFIVTGBEU34QlJQxwXy9FUgcAQigROIqFUwIqSBE4ioEEcQNkUECAL8lyDXSYEBQL6OYdM/ggC661FUtglSIL6TUxK5kXDiFfL0A9P/JoBAJoMHQTP0Dm+hlAHXATCSW23iIG6zn4FrlwEgbvLQgFADuhLy9I4cMBaAQFQgWIMHIW6VW1n0WzCYyAHPAUEz9EPiBeLolSDXSsIAiuhfA1MBvJExkTDiDwkCWlUDbXBtbW0ibrOZWyBu8tCAbyIBkTLi+EFvJBNfA/gnbxABoYIQO5rKALnjDwsMAprTHwGCEJRqmLa68uCB0z8BMcgBghCv+Q9XWMsfyz/J+EIBcG1tbSJus5lbIG7y0IBvIgGRMuL4QW8kE18D+CdvEAGhghA7msoAueMPfwsMAfCCEDuaygBw+wIQJHADBIEAglAjyHEBygFQBwHKAHABygJQBSDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFlAD+gJwAcpoI26zkX+TJG6z4pczMwFwAcoA4w0hbrOcfwHKAAEgbvLQgAHMlTFwAcoA4skB+wANAdwQJHADBIBCUCPIcQHKAVAHAcoAcAHKAlAFINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiM8WUAP6AnABymgjbrORf5MkbrPilzMzAXABygDjDSFus5x/AcoAASBu8tCAAcyVMXABygDiyQH7AA0AmH8BygDIcAHKAHABygAkbrOdfwHKAAQgbvLQgFAEzJY0A3ABygDiJG6znX8BygAEIG7y0IBQBMyWNANwAcoA4nABygACfwHKAALJWMwB76XLkGukwICgX0cw6Z/BAF11qKpbBKkQX0mpiVzIuHEK+XoB6f+TQCATQYOgmfoHN9DKAOuAmEkttvEQN1nPwLXLgJA3eWhAKAHdCXl6Rw4YC0AgKhAsQYOQt0qtrPotmExkAOeAoJn6IfEC8XRKkGulYQBFdC+BwA8AJNQB0BBIEDdGWFR3aPAbCNFVMwIBIBEUAgEgEhMBO7pLXbPFUDgEAjAoMHQTP0Dm+hlAHXATCSW23ibEGBcBD7iP/bPCBsQYFwIBIBUaAgFYFhkBD7Dd9s8ImxBgFwHa7UTQ1AH4Y9IAAY4q+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAHTP/QE0z9VMGwU4Pgo1wsKgwm68uCJ+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAGBAQHXAFkC0QHbPBgABG1wAJWy9GCcFzsPV0srnsehOw51kqFG2aCcJ3WNS0rZHyzItOvLf3xYjmCcCBVwBuAZ2OUzlg6rkclssOCcJ2XTlqzTstzOg6WbZRm6KSACAUgbHAARsK+7UTQ0gABgAHWybuNDVpcGZzOi8vUW1lb1hDcXU1cktmQmlBOVNBSjZTWkh0YkpXV0VwNE41dWp2b0UzSlNCdmNBY4IGivCmg=');
     let builder = beginCell();
     builder.storeRef(__system);
     builder.storeUint(0, 1);
-    initLightClient_init_args({ $$type: 'LightClient_init_args', owner })(builder);
+    initLightClient_init_args({ $$type: 'LightClient_init_args', entrypoint, storage_index })(builder);
     const __data = builder.endCell();
     return { code: __code, data: __data };
 }
@@ -1328,7 +1335,7 @@ const LightClient_types: ABIType[] = [
     {"name":"HandleOpWithPrePay","header":2617211426,"fields":[{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"HandleOpWithJettonPrePay","header":2774263899,"fields":[{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"ValidateJettonTransfer","header":1190188753,"fields":[{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"jetton_wallet","type":{"kind":"simple","type":"address","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"UpdateBlockHeaders","header":819026393,"fields":[{"name":"payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"UpdateBlockHeaders","header":2031003575,"fields":[{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}},{"name":"payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"PrePay","header":593867888,"fields":[{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"executor_fee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"JettonPrePay","header":2273695281,"fields":[{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"executor_fee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"CheckDeployment","header":2620465890,"fields":[{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
@@ -1347,24 +1354,22 @@ const LightClient_getters: ABIGetter[] = [
     {"name":"get_storage_index","arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"get_kontos_sim_header","arguments":[{"name":"number","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"int","optional":true,"format":257}},
     {"name":"get_tip","arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
-    {"name":"owner","arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
 ]
 
 const LightClient_receivers: ABIReceiver[] = [
     {"receiver":"internal","message":{"kind":"empty"}},
     {"receiver":"internal","message":{"kind":"typed","type":"UpdateBlockHeaders"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"ChangeOwner"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
 ]
 
 export class LightClient implements Contract {
     
-    static async init(owner: Address) {
-        return await LightClient_init(owner);
+    static async init(entrypoint: Address, storage_index: bigint) {
+        return await LightClient_init(entrypoint, storage_index);
     }
     
-    static async fromInit(owner: Address) {
-        const init = await LightClient_init(owner);
+    static async fromInit(entrypoint: Address, storage_index: bigint) {
+        const init = await LightClient_init(entrypoint, storage_index);
         const address = contractAddress(0, init);
         return new LightClient(address, init);
     }
@@ -1387,7 +1392,7 @@ export class LightClient implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: null | UpdateBlockHeaders | ChangeOwner | Deploy) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: null | UpdateBlockHeaders | Deploy) {
         
         let body: Cell | null = null;
         if (message === null) {
@@ -1395,9 +1400,6 @@ export class LightClient implements Contract {
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'UpdateBlockHeaders') {
             body = beginCell().store(storeUpdateBlockHeaders(message)).endCell();
-        }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'ChangeOwner') {
-            body = beginCell().store(storeChangeOwner(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
             body = beginCell().store(storeDeploy(message)).endCell();
@@ -1427,13 +1429,6 @@ export class LightClient implements Contract {
         let builder = new TupleBuilder();
         let source = (await provider.get('get_tip', builder.build())).stack;
         let result = source.readBigNumber();
-        return result;
-    }
-    
-    async getOwner(provider: ContractProvider) {
-        let builder = new TupleBuilder();
-        let source = (await provider.get('owner', builder.build())).stack;
-        let result = source.readAddress();
         return result;
     }
     

@@ -36,6 +36,7 @@ message ValidateJettonTransfer {
 // === Light client ===
 
 message UpdateBlockHeaders {
+    cashback: Address;
     payload: Slice as remaining;
 }
 
