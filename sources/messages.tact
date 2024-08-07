@@ -58,18 +58,13 @@ message UpdateBlockHeaders {
 message CheckOpHash {
     init_value: Int as coins;
     executor: Address;
-    digest: Int as uint256;
+    op_hash: Int as uint256;
     broker_pubkey: Cell;
     user_pubkey: Cell;
     user_nonce: Int as uint64;
     ton_amount: Int as coins;
     jetton_payload: Cell?;
     exec_payload: Slice as remaining;
-}
-
-message RecordOpHash {
-    op_hash: Int as uint256;
-    pubkey: Cell;
 }
 
 // === Smart Account ===

@@ -18,7 +18,7 @@ export async function getAdminKeyPair(): Promise<KeyPair> {
     ]);
 }
 
-export async function getWallet(keyPair: KeyPair): Promise<WalletContractV4> {
+export async function getWalletV4(keyPair: KeyPair): Promise<WalletContractV4> {
     return WalletContractV4.create({
         workchain: 0,
         publicKey: keyPair.publicKey,

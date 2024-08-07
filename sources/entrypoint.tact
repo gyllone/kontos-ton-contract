@@ -29,7 +29,7 @@ trait BaseEntrypoint with OwnableTransferable {
 
         require(msg.valid_until >= now(), "Expired");
 
-        let digest: Int = beginCell()
+        let op_hash: Int = beginCell()
             .storeAddress(myAddress())
             .storeBool(msg.pay_for_jetton)
             .storeUint(msg.valid_until, 64)
@@ -42,7 +42,7 @@ trait BaseEntrypoint with OwnableTransferable {
             .endCell()
             .hash();
         require(
-            checkSignature(digest, msg.signature, self.admin_pubkey),
+            checkSignature(op_hash, msg.signature, self.admin_pubkey),
             "Invalid signature",
         );
 
@@ -62,15 +62,15 @@ trait BaseEntrypoint with OwnableTransferable {
             null,
         );
         let fwd_fee: Int = estimate_forward_fee(origin_msg, SendPayGasSeparately);
-        send(SendParameters {
-            bounce: false,
-            to: self.get_light_client_address(msg.storage_index),
-            value: 0,
-            mode: SendRemainingValue,
-            body: CheckOpHash {
+
+        let sinit: StateInit = self.get_light_client_init(msg.storage_index);
+
+        self.forward(
+            contractAddress(sinit),
+            CheckOpHash {
                 init_value: ctx.value + fwd_fee,
                 executor: ctx.sender,
-                digest: digest,
+                op_hash: op_hash,
                 broker_pubkey: msg.broker_pubkey,
                 user_pubkey: msg.user_pubkey,
                 user_nonce: msg.user_nonce,
@@ -78,7 +78,9 @@ trait BaseEntrypoint with OwnableTransferable {
                 jetton_payload: jetton_payload,
                 exec_payload: exec_payload.beginParse()
             }.toCell(),
-        });
+            false,
+            sinit,
+        );
     }
 
     receive(msg: PrepayAndHandleOp) {
@@ -87,12 +89,9 @@ trait BaseEntrypoint with OwnableTransferable {
         let broker_address: Address = self.get_smart_account_address(msg.broker_pubkey);
         self.require_broker_valid(broker_address);
 
-        send(SendParameters {
-            bounce: false,
-            to: broker_address,
-            value: 0,
-            mode: SendRemainingValue,
-            body: PrePay {
+        self.forward(
+            broker_address,
+            PrePay {
                 init_value: msg.init_value,
                 executor: msg.executor,
                 user_pubkey: msg.user_pubkey,
@@ -101,7 +100,9 @@ trait BaseEntrypoint with OwnableTransferable {
                 jetton_payload: msg.jetton_payload,
                 exec_payload: msg.exec_payload
             }.toCell(),
-        });
+            false,
+            null,
+        );
     }
 
     // receive(msg: HandleKontosProof) {
@@ -114,19 +115,15 @@ trait BaseEntrypoint with OwnableTransferable {
         self.require_smart_account(msg.user_pubkey);
         // TODO: check jetton_wallet
 
-        send(SendParameters {
-            bounce: false,
-            to: sender(),
-            value: 0,
-            mode: SendRemainingValue,
-            body: Execute {
+        self.reply(
+            Execute {
                 refund_fee: msg.refund_fee,
                 executor: msg.executor,
                 user_nonce: null,
                 broker_pubkey: msg.broker_pubkey,
                 exec_payload: msg.exec_payload
             }.toCell()
-        });
+        );
     }
 
     inline fun require_broker_valid(broker: Address) {

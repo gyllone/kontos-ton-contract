@@ -39,16 +39,13 @@ trait BaseLightClient {
     receive(msg: CheckOpHash) {
         self.require_entrypoint();
 
-        require(self.used_op_hash.get(msg.digest) == null, "Op already used");
+        require(self.used_op_hash.get(msg.op_hash) == null, "Op already used");
 
-        self.used_op_hash.set(msg.digest, true);
+        self.used_op_hash.set(msg.op_hash, true);
 
-        send(SendParameters {
-            bounce: false,
-            to: self.entrypoint,
-            value: 0,
-            mode: SendRemainingValue,
-            body: PrepayAndHandleOp {
+        self.forward(
+            self.entrypoint,
+            PrepayAndHandleOp {
                 init_value: msg.init_value,
                 executor: msg.executor,
                 storage_index: self.storage_index,
@@ -59,7 +56,9 @@ trait BaseLightClient {
                 jetton_payload: msg.jetton_payload,
                 exec_payload: msg.exec_payload
             }.toCell(),
-        });
+            false,
+            null,
+        );
     }
 
     // receive(msg: HandleOpWithPrePay) {

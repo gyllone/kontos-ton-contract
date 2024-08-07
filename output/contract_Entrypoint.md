@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: Entrypoint
-BOC Size: 2832 bytes
+BOC Size: 2745 bytes
 
 # Types
-Total Types: 27
+Total Types: 26
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -58,12 +58,8 @@ TLB: `update_block_headers#790ea7b7 cashback:address payload:remainder<slice> = 
 Signature: `UpdateBlockHeaders{cashback:address,payload:remainder<slice>}`
 
 ## CheckOpHash
-TLB: `check_op_hash#74729f41 init_value:coins executor:address digest:uint256 broker_pubkey:^cell user_pubkey:^cell user_nonce:uint64 ton_amount:coins jetton_payload:Maybe ^cell exec_payload:remainder<slice> = CheckOpHash`
-Signature: `CheckOpHash{init_value:coins,executor:address,digest:uint256,broker_pubkey:^cell,user_pubkey:^cell,user_nonce:uint64,ton_amount:coins,jetton_payload:Maybe ^cell,exec_payload:remainder<slice>}`
-
-## RecordOpHash
-TLB: `record_op_hash#e0acc5b6 op_hash:uint256 pubkey:^cell = RecordOpHash`
-Signature: `RecordOpHash{op_hash:uint256,pubkey:^cell}`
+TLB: `check_op_hash#d5390509 init_value:coins executor:address op_hash:uint256 broker_pubkey:^cell user_pubkey:^cell user_nonce:uint64 ton_amount:coins jetton_payload:Maybe ^cell exec_payload:remainder<slice> = CheckOpHash`
+Signature: `CheckOpHash{init_value:coins,executor:address,op_hash:uint256,broker_pubkey:^cell,user_pubkey:^cell,user_nonce:uint64,ton_amount:coins,jetton_payload:Maybe ^cell,exec_payload:remainder<slice>}`
 
 ## PrePay
 TLB: `pre_pay#377618ea init_value:coins executor:address user_pubkey:^cell user_nonce:uint64 ton_amount:coins jetton_payload:Maybe ^cell exec_payload:remainder<slice> = PrePay`

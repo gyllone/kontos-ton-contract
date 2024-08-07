@@ -1,24 +1,24 @@
 import { toNano } from "@ton/core";
 import { Entrypoint } from "../../output/contract_Entrypoint";
-import { Client, JettonData } from "../constants";
-import { getKeyPair, getWallet } from "../utils";
+import { Client } from "../constants";
+import { getUserKeyPair, getWalletV4 } from "../utils";
 
 async function main() {
     // Parameters
-    const keypair = await getKeyPair();
-    const wallet = await getWallet(keypair);
+    const keypair = await getUserKeyPair();
+    const wallet = await getWalletV4(keypair);
     const sender = Client.open(wallet).sender(keypair.secretKey);
 
-    const deposit_vault = await DepositVault.fromInit(wallet.address, JettonData.Master, JettonData.WalletCode);
-    await Client.open(deposit_vault).send(
+    const entrypoint = await Entrypoint.fromInit(wallet.address);
+    await Client.open(entrypoint).send(
         sender,
-        { value: toNano("0.2") },
+        { value: toNano("0.1") },
         {
             $$type: "Deploy",
             queryId: 0n,
         },
     );
-    console.log("Deposit vault address", deposit_vault.address.toString({ testOnly: true }));
+    console.log("Entrypoint", entrypoint.address.toString({ testOnly: true }));
 }
 
 main().catch((error) => {
