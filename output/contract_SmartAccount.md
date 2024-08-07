@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: SmartAccount
-BOC Size: 3134 bytes
+BOC Size: 3231 bytes
 
 # Types
-Total Types: 24
+Total Types: 27
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -37,45 +37,57 @@ Signature: `Upgrade{code:^cell}`
 TLB: `set_admin_pubkey#0ab21f91 pubkey:uint256 = SetAdminPubkey`
 Signature: `SetAdminPubkey{pubkey:uint256}`
 
-## HandleOpWithPrePay
-TLB: `handle_op_with_pre_pay#9bff7a22 broker_pubkey:^cell user_pubkey:^cell amount:coins exec_payload:remainder<slice> = HandleOpWithPrePay`
-Signature: `HandleOpWithPrePay{broker_pubkey:^cell,user_pubkey:^cell,amount:coins,exec_payload:remainder<slice>}`
+## PrepayAndHandleOpRequest
+TLB: `prepay_and_handle_op_request#0cf06e80 pay_for_jetton:bool valid_until:uint64 storage_index:uint64 broker_pubkey:^cell user_pubkey:^cell user_nonce:uint64 ton_amount:coins payload:^cell signature:remainder<slice> = PrepayAndHandleOpRequest`
+Signature: `PrepayAndHandleOpRequest{pay_for_jetton:bool,valid_until:uint64,storage_index:uint64,broker_pubkey:^cell,user_pubkey:^cell,user_nonce:uint64,ton_amount:coins,payload:^cell,signature:remainder<slice>}`
 
-## HandleOpWithJettonPrePay
-TLB: `handle_op_with_jetton_pre_pay#a55be85b broker_pubkey:^cell user_pubkey:^cell ton_amount:coins jetton_payload:^cell exec_payload:remainder<slice> = HandleOpWithJettonPrePay`
-Signature: `HandleOpWithJettonPrePay{broker_pubkey:^cell,user_pubkey:^cell,ton_amount:coins,jetton_payload:^cell,exec_payload:remainder<slice>}`
+## PrepayAndHandleOp
+TLB: `prepay_and_handle_op#0604421d init_value:coins executor:address storage_index:uint64 broker_pubkey:^cell user_pubkey:^cell user_nonce:uint64 ton_amount:coins jetton_payload:Maybe ^cell exec_payload:remainder<slice> = PrepayAndHandleOp`
+Signature: `PrepayAndHandleOp{init_value:coins,executor:address,storage_index:uint64,broker_pubkey:^cell,user_pubkey:^cell,user_nonce:uint64,ton_amount:coins,jetton_payload:Maybe ^cell,exec_payload:remainder<slice>}`
+
+## HandleKontosProof
+TLB: `handle_kontos_proof#12d5fc02  = HandleKontosProof`
+Signature: `HandleKontosProof{}`
 
 ## ValidateJettonTransfer
-TLB: `validate_jetton_transfer#46f0d6d1 broker_pubkey:^cell user_pubkey:^cell jetton_wallet:address exec_payload:remainder<slice> = ValidateJettonTransfer`
-Signature: `ValidateJettonTransfer{broker_pubkey:^cell,user_pubkey:^cell,jetton_wallet:address,exec_payload:remainder<slice>}`
+TLB: `validate_jetton_transfer#be914bae refund_fee:coins executor:address broker_pubkey:^cell user_pubkey:^cell jetton_wallet:address exec_payload:remainder<slice> = ValidateJettonTransfer`
+Signature: `ValidateJettonTransfer{refund_fee:coins,executor:address,broker_pubkey:^cell,user_pubkey:^cell,jetton_wallet:address,exec_payload:remainder<slice>}`
 
 ## UpdateBlockHeaders
 TLB: `update_block_headers#790ea7b7 cashback:address payload:remainder<slice> = UpdateBlockHeaders`
 Signature: `UpdateBlockHeaders{cashback:address,payload:remainder<slice>}`
 
-## PrePay
-TLB: `pre_pay#2365b470 executor:address executor_fee:coins user_pubkey:^cell amount:coins exec_payload:remainder<slice> = PrePay`
-Signature: `PrePay{executor:address,executor_fee:coins,user_pubkey:^cell,amount:coins,exec_payload:remainder<slice>}`
+## CheckOpHash
+TLB: `check_op_hash#74729f41 init_value:coins executor:address digest:uint256 broker_pubkey:^cell user_pubkey:^cell user_nonce:uint64 ton_amount:coins jetton_payload:Maybe ^cell exec_payload:remainder<slice> = CheckOpHash`
+Signature: `CheckOpHash{init_value:coins,executor:address,digest:uint256,broker_pubkey:^cell,user_pubkey:^cell,user_nonce:uint64,ton_amount:coins,jetton_payload:Maybe ^cell,exec_payload:remainder<slice>}`
 
-## JettonPrePay
-TLB: `jetton_pre_pay#8785d631 executor:address executor_fee:coins user_pubkey:^cell ton_amount:coins jetton_payload:^cell exec_payload:remainder<slice> = JettonPrePay`
-Signature: `JettonPrePay{executor:address,executor_fee:coins,user_pubkey:^cell,ton_amount:coins,jetton_payload:^cell,exec_payload:remainder<slice>}`
+## RecordOpHash
+TLB: `record_op_hash#e0acc5b6 op_hash:uint256 pubkey:^cell = RecordOpHash`
+Signature: `RecordOpHash{op_hash:uint256,pubkey:^cell}`
+
+## PrePay
+TLB: `pre_pay#377618ea init_value:coins executor:address user_pubkey:^cell user_nonce:uint64 ton_amount:coins jetton_payload:Maybe ^cell exec_payload:remainder<slice> = PrePay`
+Signature: `PrePay{init_value:coins,executor:address,user_pubkey:^cell,user_nonce:uint64,ton_amount:coins,jetton_payload:Maybe ^cell,exec_payload:remainder<slice>}`
 
 ## CheckDeployment
-TLB: `check_deployment#9c3122e2 broker_pubkey:^cell ton_amount:coins jetton_payload:^cell exec_payload:remainder<slice> = CheckDeployment`
-Signature: `CheckDeployment{broker_pubkey:^cell,ton_amount:coins,jetton_payload:^cell,exec_payload:remainder<slice>}`
+TLB: `check_deployment#141fec2f refund_fee:coins executor:address user_nonce:uint64 broker_pubkey:^cell ton_amount:coins jetton_payload:^cell exec_payload:remainder<slice> = CheckDeployment`
+Signature: `CheckDeployment{refund_fee:coins,executor:address,user_nonce:uint64,broker_pubkey:^cell,ton_amount:coins,jetton_payload:^cell,exec_payload:remainder<slice>}`
 
-## JettonPrePayInternal
-TLB: `jetton_pre_pay_internal#2a6bee57 user_pubkey:^cell ton_amount:coins jetton_payload:^cell exec_payload:remainder<slice> = JettonPrePayInternal`
-Signature: `JettonPrePayInternal{user_pubkey:^cell,ton_amount:coins,jetton_payload:^cell,exec_payload:remainder<slice>}`
+## JettonPrepay
+TLB: `jetton_prepay#94d25dd6 refund_fee:coins executor:address user_pubkey:^cell ton_amount:coins jetton_payload:^cell exec_payload:remainder<slice> = JettonPrepay`
+Signature: `JettonPrepay{refund_fee:coins,executor:address,user_pubkey:^cell,ton_amount:coins,jetton_payload:^cell,exec_payload:remainder<slice>}`
 
 ## Execute
-TLB: `execute#8e8820df broker_pubkey:^cell exec_payload:remainder<slice> = Execute`
-Signature: `Execute{broker_pubkey:^cell,exec_payload:remainder<slice>}`
+TLB: `execute#c10acfbf refund_fee:coins executor:address user_nonce:Maybe int257 broker_pubkey:^cell exec_payload:remainder<slice> = Execute`
+Signature: `Execute{refund_fee:coins,executor:address,user_nonce:Maybe int257,broker_pubkey:^cell,exec_payload:remainder<slice>}`
 
 ## ExecuteByEOA
 TLB: `execute_by_eoa#f06d27c6 exec_payload:remainder<slice> = ExecuteByEOA`
 Signature: `ExecuteByEOA{exec_payload:remainder<slice>}`
+
+## RefundFee
+TLB: `refund_fee#773f81ed init_value:coins = RefundFee`
+Signature: `RefundFee{init_value:coins}`
 
 ## UpdatePubkey
 TLB: `update_pubkey#558b05ee pubkey:^cell = UpdatePubkey`
@@ -130,6 +142,9 @@ Total Get Methods: 0
 136: Invalid address
 137: Masterchain support is not enabled for this contract
 4429: Invalid sender
+17473: Expired
+18527: Op already used
 27543: Block hash mismatch
 45716: Invalid broker
 47851: Block number out of range
+48401: Invalid signature

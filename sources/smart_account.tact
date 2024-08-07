@@ -6,6 +6,7 @@ import "./messages";
 trait BaseSmartAccount {
 
     const MAX_EXTERNAL_OWNERS: Int = 100;
+    const GAS_COMPENSATION: Int = 10000;
 
     pubkey: Cell; // reserved for future use, secp256r1 pubkey
     nonce: Int;
@@ -49,67 +50,61 @@ trait BaseSmartAccount {
     receive(msg: PrePay) {
         self.require_entrypoint();
 
-        let sinit: StateInit = self.get_smart_account_init(msg.user_pubkey);
-        // prepay and execute
-        send(SendParameters {
-            bounce: true,
-            to: contractAddress(sinit),
-            value: msg.amount,
-            mode: SendPayGasSeparately,
-            body: Execute {
-                broker_pubkey: self.pubkey,
-                exec_payload: msg.exec_payload
-            }.toCell(),
-            code: sinit.code,
-            data: sinit.data
-        });
-
-        // pay to executor
-        send(SendParameters {
-            bounce: false,
-            to: msg.executor,
-            value: msg.executor_fee,
-            mode: SendPayGasSeparately
-        });
-    }
-
-    receive(msg: JettonPrePay) {
-        self.require_entrypoint();
+        let refund_fee: Int = msg.init_value + compute_gas_fee(self.GAS_COMPENSATION);
 
         let sinit: StateInit = self.get_smart_account_init(msg.user_pubkey);
-        send(SendParameters {
-            bounce: true,
-            to: contractAddress(sinit),
-            value: 0,
-            mode: SendPayGasSeparately,
-            body: CheckDeployment {
-                broker_pubkey: self.pubkey,
-                ton_amount: msg.ton_amount,
-                jetton_payload: msg.jetton_payload,
-                exec_payload: msg.exec_payload
-            }.toCell(),
-            code: sinit.code,
-            data: sinit.data
-        });
-
-        // pay to executor
-        send(SendParameters {
-            bounce: false,
-            to: msg.executor,
-            value: msg.executor_fee,
-            mode: SendPayGasSeparately
-        });
+        if (msg.jetton_payload != null) {
+            // check deployment first
+            send(SendParameters {
+                bounce: true,
+                to: contractAddress(sinit),
+                value: 0,
+                mode: SendRemainingBalance,
+                body: CheckDeployment {
+                    refund_fee: refund_fee,
+                    executor: msg.executor,
+                    user_nonce: msg.user_nonce,
+                    broker_pubkey: self.pubkey,
+                    ton_amount: msg.ton_amount,
+                    jetton_payload: msg.jetton_payload!!,
+                    exec_payload: msg.exec_payload
+                }.toCell(),
+                code: sinit.code,
+                data: sinit.data
+            });
+        } else {
+            // prepay and execute
+            send(SendParameters {
+                bounce: true,
+                to: contractAddress(sinit),
+                value: msg.ton_amount + refund_fee,
+                mode: SendPayGasSeparately,
+                body: Execute {
+                    refund_fee: refund_fee,
+                    executor: msg.executor,
+                    user_nonce: msg.user_nonce,
+                    broker_pubkey: self.pubkey,
+                    exec_payload: msg.exec_payload
+                }.toCell(),
+                code: sinit.code,
+                data: sinit.data
+            });
+        }
     }
 
     receive(msg: CheckDeployment) {
         self.require_smart_account(msg.broker_pubkey);
+
+        self.nonce = msg.user_nonce;
 
         send(SendParameters {
             bounce: true,
             to: sender(),
             value: 0,
             mode: SendRemainingValue,
-            body: JettonPrePayInternal {
+            body: JettonPrepay {
+                refund_fee: msg.refund_fee,
+                executor: msg.executor,
                 user_pubkey: self.pubkey,
                 ton_amount: msg.ton_amount,
                 jetton_payload: msg.jetton_payload,
@@ -118,7 +113,7 @@ trait BaseSmartAccount {
         });
     }
 
-    receive(msg: JettonPrePayInternal) {
+    receive(msg: JettonPrepay) {
         self.require_smart_account(msg.user_pubkey);
 
         let jetton_payload: Slice = msg.jetton_payload.beginParse();
@@ -132,14 +127,17 @@ trait BaseSmartAccount {
         jetton_payload.endParse();
 
         let forward_payload: Slice = beginCell()
+            .storeCoins(msg.refund_fee)
+            .storeAddress(msg.executor)
             .storeRef(self.pubkey)
             .storeSlice(msg.exec_payload)
             .asSlice();
+        let ton_amount: Int = msg.ton_amount + msg.refund_fee;
         // prepay jetton
         send(SendParameters {
             bounce: false,
             to: jetton_wallet_address,
-            value: jetton_fee + msg.ton_amount,
+            value: jetton_fee + ton_amount,
             mode: SendPayGasSeparately,
             body: JettonTransfer {
                 query_id: 0,
@@ -147,7 +145,7 @@ trait BaseSmartAccount {
                 destination: sender(),
                 response_destination: myAddress(),
                 custom_payload: custom_payload,
-                forward_ton_amount: msg.ton_amount,
+                forward_ton_amount: ton_amount,
                 forward_payload: forward_payload
             }.toCell(),
         });
@@ -155,6 +153,17 @@ trait BaseSmartAccount {
 
     receive(msg: Execute) {
         self.require_entrypoint_or_smart_account(msg.broker_pubkey);
+        if (msg.user_nonce != null) {
+            self.nonce = msg.user_nonce!!;
+        }
+
+        // refund to the executor
+        send(SendParameters {
+            bounce: false,
+            to: msg.executor,
+            value: msg.refund_fee,
+            mode: SendPayGasSeparately
+        });
 
         // send the execution messages
         while(msg.exec_payload.refs() > 0) {
@@ -165,6 +174,8 @@ trait BaseSmartAccount {
     }
 
     receive(msg: JettonTransferNotification) {
+        let refund_fee: Int = msg.forward_payload.loadCoins();
+        let executor: Address = msg.forward_payload.loadAddress();
         let broker_pubkey: Cell = msg.forward_payload.loadRef();
         let exec_payload: Slice = msg.forward_payload;
 
@@ -174,6 +185,8 @@ trait BaseSmartAccount {
             value: 0,
             mode: SendRemainingBalance,
             body: ValidateJettonTransfer {
+                refund_fee: refund_fee,
+                executor: executor,
                 broker_pubkey: broker_pubkey,
                 user_pubkey: self.pubkey,
                 jetton_wallet: sender(),

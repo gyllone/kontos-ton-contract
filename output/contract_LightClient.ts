@@ -405,127 +405,211 @@ function dictValueParserSetAdminPubkey(): DictionaryValue<SetAdminPubkey> {
     }
 }
 
-export type HandleOpWithPrePay = {
-    $$type: 'HandleOpWithPrePay';
+export type PrepayAndHandleOpRequest = {
+    $$type: 'PrepayAndHandleOpRequest';
+    pay_for_jetton: boolean;
+    valid_until: bigint;
+    storage_index: bigint;
     broker_pubkey: Cell;
     user_pubkey: Cell;
-    amount: bigint;
-    exec_payload: Cell;
+    user_nonce: bigint;
+    ton_amount: bigint;
+    payload: Cell;
+    signature: Cell;
 }
 
-export function storeHandleOpWithPrePay(src: HandleOpWithPrePay) {
+export function storePrepayAndHandleOpRequest(src: PrepayAndHandleOpRequest) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeUint(2617211426, 32);
+        b_0.storeUint(217083520, 32);
+        b_0.storeBit(src.pay_for_jetton);
+        b_0.storeUint(src.valid_until, 64);
+        b_0.storeUint(src.storage_index, 64);
         b_0.storeRef(src.broker_pubkey);
         b_0.storeRef(src.user_pubkey);
-        b_0.storeCoins(src.amount);
-        b_0.storeBuilder(src.exec_payload.asBuilder());
+        b_0.storeUint(src.user_nonce, 64);
+        b_0.storeCoins(src.ton_amount);
+        b_0.storeRef(src.payload);
+        b_0.storeBuilder(src.signature.asBuilder());
     };
 }
 
-export function loadHandleOpWithPrePay(slice: Slice) {
+export function loadPrepayAndHandleOpRequest(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2617211426) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 217083520) { throw Error('Invalid prefix'); }
+    let _pay_for_jetton = sc_0.loadBit();
+    let _valid_until = sc_0.loadUintBig(64);
+    let _storage_index = sc_0.loadUintBig(64);
     let _broker_pubkey = sc_0.loadRef();
     let _user_pubkey = sc_0.loadRef();
-    let _amount = sc_0.loadCoins();
-    let _exec_payload = sc_0.asCell();
-    return { $$type: 'HandleOpWithPrePay' as const, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, amount: _amount, exec_payload: _exec_payload };
+    let _user_nonce = sc_0.loadUintBig(64);
+    let _ton_amount = sc_0.loadCoins();
+    let _payload = sc_0.loadRef();
+    let _signature = sc_0.asCell();
+    return { $$type: 'PrepayAndHandleOpRequest' as const, pay_for_jetton: _pay_for_jetton, valid_until: _valid_until, storage_index: _storage_index, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, user_nonce: _user_nonce, ton_amount: _ton_amount, payload: _payload, signature: _signature };
 }
 
-function loadTupleHandleOpWithPrePay(source: TupleReader) {
+function loadTuplePrepayAndHandleOpRequest(source: TupleReader) {
+    let _pay_for_jetton = source.readBoolean();
+    let _valid_until = source.readBigNumber();
+    let _storage_index = source.readBigNumber();
     let _broker_pubkey = source.readCell();
     let _user_pubkey = source.readCell();
-    let _amount = source.readBigNumber();
-    let _exec_payload = source.readCell();
-    return { $$type: 'HandleOpWithPrePay' as const, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, amount: _amount, exec_payload: _exec_payload };
+    let _user_nonce = source.readBigNumber();
+    let _ton_amount = source.readBigNumber();
+    let _payload = source.readCell();
+    let _signature = source.readCell();
+    return { $$type: 'PrepayAndHandleOpRequest' as const, pay_for_jetton: _pay_for_jetton, valid_until: _valid_until, storage_index: _storage_index, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, user_nonce: _user_nonce, ton_amount: _ton_amount, payload: _payload, signature: _signature };
 }
 
-function storeTupleHandleOpWithPrePay(source: HandleOpWithPrePay) {
+function storeTuplePrepayAndHandleOpRequest(source: PrepayAndHandleOpRequest) {
     let builder = new TupleBuilder();
+    builder.writeBoolean(source.pay_for_jetton);
+    builder.writeNumber(source.valid_until);
+    builder.writeNumber(source.storage_index);
     builder.writeCell(source.broker_pubkey);
     builder.writeCell(source.user_pubkey);
-    builder.writeNumber(source.amount);
-    builder.writeSlice(source.exec_payload);
+    builder.writeNumber(source.user_nonce);
+    builder.writeNumber(source.ton_amount);
+    builder.writeCell(source.payload);
+    builder.writeSlice(source.signature);
     return builder.build();
 }
 
-function dictValueParserHandleOpWithPrePay(): DictionaryValue<HandleOpWithPrePay> {
+function dictValueParserPrepayAndHandleOpRequest(): DictionaryValue<PrepayAndHandleOpRequest> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeHandleOpWithPrePay(src)).endCell());
+            builder.storeRef(beginCell().store(storePrepayAndHandleOpRequest(src)).endCell());
         },
         parse: (src) => {
-            return loadHandleOpWithPrePay(src.loadRef().beginParse());
+            return loadPrepayAndHandleOpRequest(src.loadRef().beginParse());
         }
     }
 }
 
-export type HandleOpWithJettonPrePay = {
-    $$type: 'HandleOpWithJettonPrePay';
+export type PrepayAndHandleOp = {
+    $$type: 'PrepayAndHandleOp';
+    init_value: bigint;
+    executor: Address;
+    storage_index: bigint;
     broker_pubkey: Cell;
     user_pubkey: Cell;
+    user_nonce: bigint;
     ton_amount: bigint;
-    jetton_payload: Cell;
+    jetton_payload: Cell | null;
     exec_payload: Cell;
 }
 
-export function storeHandleOpWithJettonPrePay(src: HandleOpWithJettonPrePay) {
+export function storePrepayAndHandleOp(src: PrepayAndHandleOp) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeUint(2774263899, 32);
+        b_0.storeUint(100942365, 32);
+        b_0.storeCoins(src.init_value);
+        b_0.storeAddress(src.executor);
+        b_0.storeUint(src.storage_index, 64);
         b_0.storeRef(src.broker_pubkey);
         b_0.storeRef(src.user_pubkey);
+        b_0.storeUint(src.user_nonce, 64);
         b_0.storeCoins(src.ton_amount);
-        b_0.storeRef(src.jetton_payload);
+        if (src.jetton_payload !== null && src.jetton_payload !== undefined) { b_0.storeBit(true).storeRef(src.jetton_payload); } else { b_0.storeBit(false); }
         b_0.storeBuilder(src.exec_payload.asBuilder());
     };
 }
 
-export function loadHandleOpWithJettonPrePay(slice: Slice) {
+export function loadPrepayAndHandleOp(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2774263899) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 100942365) { throw Error('Invalid prefix'); }
+    let _init_value = sc_0.loadCoins();
+    let _executor = sc_0.loadAddress();
+    let _storage_index = sc_0.loadUintBig(64);
     let _broker_pubkey = sc_0.loadRef();
     let _user_pubkey = sc_0.loadRef();
+    let _user_nonce = sc_0.loadUintBig(64);
     let _ton_amount = sc_0.loadCoins();
-    let _jetton_payload = sc_0.loadRef();
+    let _jetton_payload = sc_0.loadBit() ? sc_0.loadRef() : null;
     let _exec_payload = sc_0.asCell();
-    return { $$type: 'HandleOpWithJettonPrePay' as const, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
+    return { $$type: 'PrepayAndHandleOp' as const, init_value: _init_value, executor: _executor, storage_index: _storage_index, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, user_nonce: _user_nonce, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
 }
 
-function loadTupleHandleOpWithJettonPrePay(source: TupleReader) {
+function loadTuplePrepayAndHandleOp(source: TupleReader) {
+    let _init_value = source.readBigNumber();
+    let _executor = source.readAddress();
+    let _storage_index = source.readBigNumber();
     let _broker_pubkey = source.readCell();
     let _user_pubkey = source.readCell();
+    let _user_nonce = source.readBigNumber();
     let _ton_amount = source.readBigNumber();
-    let _jetton_payload = source.readCell();
+    let _jetton_payload = source.readCellOpt();
     let _exec_payload = source.readCell();
-    return { $$type: 'HandleOpWithJettonPrePay' as const, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
+    return { $$type: 'PrepayAndHandleOp' as const, init_value: _init_value, executor: _executor, storage_index: _storage_index, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, user_nonce: _user_nonce, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
 }
 
-function storeTupleHandleOpWithJettonPrePay(source: HandleOpWithJettonPrePay) {
+function storeTuplePrepayAndHandleOp(source: PrepayAndHandleOp) {
     let builder = new TupleBuilder();
+    builder.writeNumber(source.init_value);
+    builder.writeAddress(source.executor);
+    builder.writeNumber(source.storage_index);
     builder.writeCell(source.broker_pubkey);
     builder.writeCell(source.user_pubkey);
+    builder.writeNumber(source.user_nonce);
     builder.writeNumber(source.ton_amount);
     builder.writeCell(source.jetton_payload);
     builder.writeSlice(source.exec_payload);
     return builder.build();
 }
 
-function dictValueParserHandleOpWithJettonPrePay(): DictionaryValue<HandleOpWithJettonPrePay> {
+function dictValueParserPrepayAndHandleOp(): DictionaryValue<PrepayAndHandleOp> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeHandleOpWithJettonPrePay(src)).endCell());
+            builder.storeRef(beginCell().store(storePrepayAndHandleOp(src)).endCell());
         },
         parse: (src) => {
-            return loadHandleOpWithJettonPrePay(src.loadRef().beginParse());
+            return loadPrepayAndHandleOp(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type HandleKontosProof = {
+    $$type: 'HandleKontosProof';
+}
+
+export function storeHandleKontosProof(src: HandleKontosProof) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(316013570, 32);
+    };
+}
+
+export function loadHandleKontosProof(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 316013570) { throw Error('Invalid prefix'); }
+    return { $$type: 'HandleKontosProof' as const };
+}
+
+function loadTupleHandleKontosProof(source: TupleReader) {
+    return { $$type: 'HandleKontosProof' as const };
+}
+
+function storeTupleHandleKontosProof(source: HandleKontosProof) {
+    let builder = new TupleBuilder();
+    return builder.build();
+}
+
+function dictValueParserHandleKontosProof(): DictionaryValue<HandleKontosProof> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeHandleKontosProof(src)).endCell());
+        },
+        parse: (src) => {
+            return loadHandleKontosProof(src.loadRef().beginParse());
         }
     }
 }
 
 export type ValidateJettonTransfer = {
     $$type: 'ValidateJettonTransfer';
+    refund_fee: bigint;
+    executor: Address;
     broker_pubkey: Cell;
     user_pubkey: Cell;
     jetton_wallet: Address;
@@ -535,7 +619,9 @@ export type ValidateJettonTransfer = {
 export function storeValidateJettonTransfer(src: ValidateJettonTransfer) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeUint(1190188753, 32);
+        b_0.storeUint(3197193134, 32);
+        b_0.storeCoins(src.refund_fee);
+        b_0.storeAddress(src.executor);
         b_0.storeRef(src.broker_pubkey);
         b_0.storeRef(src.user_pubkey);
         b_0.storeAddress(src.jetton_wallet);
@@ -545,24 +631,30 @@ export function storeValidateJettonTransfer(src: ValidateJettonTransfer) {
 
 export function loadValidateJettonTransfer(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 1190188753) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 3197193134) { throw Error('Invalid prefix'); }
+    let _refund_fee = sc_0.loadCoins();
+    let _executor = sc_0.loadAddress();
     let _broker_pubkey = sc_0.loadRef();
     let _user_pubkey = sc_0.loadRef();
     let _jetton_wallet = sc_0.loadAddress();
     let _exec_payload = sc_0.asCell();
-    return { $$type: 'ValidateJettonTransfer' as const, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, jetton_wallet: _jetton_wallet, exec_payload: _exec_payload };
+    return { $$type: 'ValidateJettonTransfer' as const, refund_fee: _refund_fee, executor: _executor, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, jetton_wallet: _jetton_wallet, exec_payload: _exec_payload };
 }
 
 function loadTupleValidateJettonTransfer(source: TupleReader) {
+    let _refund_fee = source.readBigNumber();
+    let _executor = source.readAddress();
     let _broker_pubkey = source.readCell();
     let _user_pubkey = source.readCell();
     let _jetton_wallet = source.readAddress();
     let _exec_payload = source.readCell();
-    return { $$type: 'ValidateJettonTransfer' as const, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, jetton_wallet: _jetton_wallet, exec_payload: _exec_payload };
+    return { $$type: 'ValidateJettonTransfer' as const, refund_fee: _refund_fee, executor: _executor, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, jetton_wallet: _jetton_wallet, exec_payload: _exec_payload };
 }
 
 function storeTupleValidateJettonTransfer(source: ValidateJettonTransfer) {
     let builder = new TupleBuilder();
+    builder.writeNumber(source.refund_fee);
+    builder.writeAddress(source.executor);
     builder.writeCell(source.broker_pubkey);
     builder.writeCell(source.user_pubkey);
     builder.writeAddress(source.jetton_wallet);
@@ -628,53 +720,192 @@ function dictValueParserUpdateBlockHeaders(): DictionaryValue<UpdateBlockHeaders
     }
 }
 
+export type CheckOpHash = {
+    $$type: 'CheckOpHash';
+    init_value: bigint;
+    executor: Address;
+    digest: bigint;
+    broker_pubkey: Cell;
+    user_pubkey: Cell;
+    user_nonce: bigint;
+    ton_amount: bigint;
+    jetton_payload: Cell | null;
+    exec_payload: Cell;
+}
+
+export function storeCheckOpHash(src: CheckOpHash) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(1953668929, 32);
+        b_0.storeCoins(src.init_value);
+        b_0.storeAddress(src.executor);
+        b_0.storeUint(src.digest, 256);
+        b_0.storeRef(src.broker_pubkey);
+        b_0.storeRef(src.user_pubkey);
+        b_0.storeUint(src.user_nonce, 64);
+        b_0.storeCoins(src.ton_amount);
+        if (src.jetton_payload !== null && src.jetton_payload !== undefined) { b_0.storeBit(true).storeRef(src.jetton_payload); } else { b_0.storeBit(false); }
+        b_0.storeBuilder(src.exec_payload.asBuilder());
+    };
+}
+
+export function loadCheckOpHash(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 1953668929) { throw Error('Invalid prefix'); }
+    let _init_value = sc_0.loadCoins();
+    let _executor = sc_0.loadAddress();
+    let _digest = sc_0.loadUintBig(256);
+    let _broker_pubkey = sc_0.loadRef();
+    let _user_pubkey = sc_0.loadRef();
+    let _user_nonce = sc_0.loadUintBig(64);
+    let _ton_amount = sc_0.loadCoins();
+    let _jetton_payload = sc_0.loadBit() ? sc_0.loadRef() : null;
+    let _exec_payload = sc_0.asCell();
+    return { $$type: 'CheckOpHash' as const, init_value: _init_value, executor: _executor, digest: _digest, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, user_nonce: _user_nonce, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
+}
+
+function loadTupleCheckOpHash(source: TupleReader) {
+    let _init_value = source.readBigNumber();
+    let _executor = source.readAddress();
+    let _digest = source.readBigNumber();
+    let _broker_pubkey = source.readCell();
+    let _user_pubkey = source.readCell();
+    let _user_nonce = source.readBigNumber();
+    let _ton_amount = source.readBigNumber();
+    let _jetton_payload = source.readCellOpt();
+    let _exec_payload = source.readCell();
+    return { $$type: 'CheckOpHash' as const, init_value: _init_value, executor: _executor, digest: _digest, broker_pubkey: _broker_pubkey, user_pubkey: _user_pubkey, user_nonce: _user_nonce, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
+}
+
+function storeTupleCheckOpHash(source: CheckOpHash) {
+    let builder = new TupleBuilder();
+    builder.writeNumber(source.init_value);
+    builder.writeAddress(source.executor);
+    builder.writeNumber(source.digest);
+    builder.writeCell(source.broker_pubkey);
+    builder.writeCell(source.user_pubkey);
+    builder.writeNumber(source.user_nonce);
+    builder.writeNumber(source.ton_amount);
+    builder.writeCell(source.jetton_payload);
+    builder.writeSlice(source.exec_payload);
+    return builder.build();
+}
+
+function dictValueParserCheckOpHash(): DictionaryValue<CheckOpHash> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeCheckOpHash(src)).endCell());
+        },
+        parse: (src) => {
+            return loadCheckOpHash(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type RecordOpHash = {
+    $$type: 'RecordOpHash';
+    op_hash: bigint;
+    pubkey: Cell;
+}
+
+export function storeRecordOpHash(src: RecordOpHash) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(3769419190, 32);
+        b_0.storeUint(src.op_hash, 256);
+        b_0.storeRef(src.pubkey);
+    };
+}
+
+export function loadRecordOpHash(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 3769419190) { throw Error('Invalid prefix'); }
+    let _op_hash = sc_0.loadUintBig(256);
+    let _pubkey = sc_0.loadRef();
+    return { $$type: 'RecordOpHash' as const, op_hash: _op_hash, pubkey: _pubkey };
+}
+
+function loadTupleRecordOpHash(source: TupleReader) {
+    let _op_hash = source.readBigNumber();
+    let _pubkey = source.readCell();
+    return { $$type: 'RecordOpHash' as const, op_hash: _op_hash, pubkey: _pubkey };
+}
+
+function storeTupleRecordOpHash(source: RecordOpHash) {
+    let builder = new TupleBuilder();
+    builder.writeNumber(source.op_hash);
+    builder.writeCell(source.pubkey);
+    return builder.build();
+}
+
+function dictValueParserRecordOpHash(): DictionaryValue<RecordOpHash> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeRecordOpHash(src)).endCell());
+        },
+        parse: (src) => {
+            return loadRecordOpHash(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type PrePay = {
     $$type: 'PrePay';
+    init_value: bigint;
     executor: Address;
-    executor_fee: bigint;
     user_pubkey: Cell;
-    amount: bigint;
+    user_nonce: bigint;
+    ton_amount: bigint;
+    jetton_payload: Cell | null;
     exec_payload: Cell;
 }
 
 export function storePrePay(src: PrePay) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeUint(593867888, 32);
+        b_0.storeUint(930486506, 32);
+        b_0.storeCoins(src.init_value);
         b_0.storeAddress(src.executor);
-        b_0.storeCoins(src.executor_fee);
         b_0.storeRef(src.user_pubkey);
-        b_0.storeCoins(src.amount);
+        b_0.storeUint(src.user_nonce, 64);
+        b_0.storeCoins(src.ton_amount);
+        if (src.jetton_payload !== null && src.jetton_payload !== undefined) { b_0.storeBit(true).storeRef(src.jetton_payload); } else { b_0.storeBit(false); }
         b_0.storeBuilder(src.exec_payload.asBuilder());
     };
 }
 
 export function loadPrePay(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 593867888) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 930486506) { throw Error('Invalid prefix'); }
+    let _init_value = sc_0.loadCoins();
     let _executor = sc_0.loadAddress();
-    let _executor_fee = sc_0.loadCoins();
     let _user_pubkey = sc_0.loadRef();
-    let _amount = sc_0.loadCoins();
+    let _user_nonce = sc_0.loadUintBig(64);
+    let _ton_amount = sc_0.loadCoins();
+    let _jetton_payload = sc_0.loadBit() ? sc_0.loadRef() : null;
     let _exec_payload = sc_0.asCell();
-    return { $$type: 'PrePay' as const, executor: _executor, executor_fee: _executor_fee, user_pubkey: _user_pubkey, amount: _amount, exec_payload: _exec_payload };
+    return { $$type: 'PrePay' as const, init_value: _init_value, executor: _executor, user_pubkey: _user_pubkey, user_nonce: _user_nonce, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
 }
 
 function loadTuplePrePay(source: TupleReader) {
+    let _init_value = source.readBigNumber();
     let _executor = source.readAddress();
-    let _executor_fee = source.readBigNumber();
     let _user_pubkey = source.readCell();
-    let _amount = source.readBigNumber();
+    let _user_nonce = source.readBigNumber();
+    let _ton_amount = source.readBigNumber();
+    let _jetton_payload = source.readCellOpt();
     let _exec_payload = source.readCell();
-    return { $$type: 'PrePay' as const, executor: _executor, executor_fee: _executor_fee, user_pubkey: _user_pubkey, amount: _amount, exec_payload: _exec_payload };
+    return { $$type: 'PrePay' as const, init_value: _init_value, executor: _executor, user_pubkey: _user_pubkey, user_nonce: _user_nonce, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
 }
 
 function storeTuplePrePay(source: PrePay) {
     let builder = new TupleBuilder();
+    builder.writeNumber(source.init_value);
     builder.writeAddress(source.executor);
-    builder.writeNumber(source.executor_fee);
     builder.writeCell(source.user_pubkey);
-    builder.writeNumber(source.amount);
+    builder.writeNumber(source.user_nonce);
+    builder.writeNumber(source.ton_amount);
+    builder.writeCell(source.jetton_payload);
     builder.writeSlice(source.exec_payload);
     return builder.build();
 }
@@ -690,75 +921,11 @@ function dictValueParserPrePay(): DictionaryValue<PrePay> {
     }
 }
 
-export type JettonPrePay = {
-    $$type: 'JettonPrePay';
-    executor: Address;
-    executor_fee: bigint;
-    user_pubkey: Cell;
-    ton_amount: bigint;
-    jetton_payload: Cell;
-    exec_payload: Cell;
-}
-
-export function storeJettonPrePay(src: JettonPrePay) {
-    return (builder: Builder) => {
-        let b_0 = builder;
-        b_0.storeUint(2273695281, 32);
-        b_0.storeAddress(src.executor);
-        b_0.storeCoins(src.executor_fee);
-        b_0.storeRef(src.user_pubkey);
-        b_0.storeCoins(src.ton_amount);
-        b_0.storeRef(src.jetton_payload);
-        b_0.storeBuilder(src.exec_payload.asBuilder());
-    };
-}
-
-export function loadJettonPrePay(slice: Slice) {
-    let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2273695281) { throw Error('Invalid prefix'); }
-    let _executor = sc_0.loadAddress();
-    let _executor_fee = sc_0.loadCoins();
-    let _user_pubkey = sc_0.loadRef();
-    let _ton_amount = sc_0.loadCoins();
-    let _jetton_payload = sc_0.loadRef();
-    let _exec_payload = sc_0.asCell();
-    return { $$type: 'JettonPrePay' as const, executor: _executor, executor_fee: _executor_fee, user_pubkey: _user_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
-}
-
-function loadTupleJettonPrePay(source: TupleReader) {
-    let _executor = source.readAddress();
-    let _executor_fee = source.readBigNumber();
-    let _user_pubkey = source.readCell();
-    let _ton_amount = source.readBigNumber();
-    let _jetton_payload = source.readCell();
-    let _exec_payload = source.readCell();
-    return { $$type: 'JettonPrePay' as const, executor: _executor, executor_fee: _executor_fee, user_pubkey: _user_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
-}
-
-function storeTupleJettonPrePay(source: JettonPrePay) {
-    let builder = new TupleBuilder();
-    builder.writeAddress(source.executor);
-    builder.writeNumber(source.executor_fee);
-    builder.writeCell(source.user_pubkey);
-    builder.writeNumber(source.ton_amount);
-    builder.writeCell(source.jetton_payload);
-    builder.writeSlice(source.exec_payload);
-    return builder.build();
-}
-
-function dictValueParserJettonPrePay(): DictionaryValue<JettonPrePay> {
-    return {
-        serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeJettonPrePay(src)).endCell());
-        },
-        parse: (src) => {
-            return loadJettonPrePay(src.loadRef().beginParse());
-        }
-    }
-}
-
 export type CheckDeployment = {
     $$type: 'CheckDeployment';
+    refund_fee: bigint;
+    executor: Address;
+    user_nonce: bigint;
     broker_pubkey: Cell;
     ton_amount: bigint;
     jetton_payload: Cell;
@@ -768,7 +935,10 @@ export type CheckDeployment = {
 export function storeCheckDeployment(src: CheckDeployment) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeUint(2620465890, 32);
+        b_0.storeUint(337636399, 32);
+        b_0.storeCoins(src.refund_fee);
+        b_0.storeAddress(src.executor);
+        b_0.storeUint(src.user_nonce, 64);
         b_0.storeRef(src.broker_pubkey);
         b_0.storeCoins(src.ton_amount);
         b_0.storeRef(src.jetton_payload);
@@ -778,24 +948,33 @@ export function storeCheckDeployment(src: CheckDeployment) {
 
 export function loadCheckDeployment(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2620465890) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 337636399) { throw Error('Invalid prefix'); }
+    let _refund_fee = sc_0.loadCoins();
+    let _executor = sc_0.loadAddress();
+    let _user_nonce = sc_0.loadUintBig(64);
     let _broker_pubkey = sc_0.loadRef();
     let _ton_amount = sc_0.loadCoins();
     let _jetton_payload = sc_0.loadRef();
     let _exec_payload = sc_0.asCell();
-    return { $$type: 'CheckDeployment' as const, broker_pubkey: _broker_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
+    return { $$type: 'CheckDeployment' as const, refund_fee: _refund_fee, executor: _executor, user_nonce: _user_nonce, broker_pubkey: _broker_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
 }
 
 function loadTupleCheckDeployment(source: TupleReader) {
+    let _refund_fee = source.readBigNumber();
+    let _executor = source.readAddress();
+    let _user_nonce = source.readBigNumber();
     let _broker_pubkey = source.readCell();
     let _ton_amount = source.readBigNumber();
     let _jetton_payload = source.readCell();
     let _exec_payload = source.readCell();
-    return { $$type: 'CheckDeployment' as const, broker_pubkey: _broker_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
+    return { $$type: 'CheckDeployment' as const, refund_fee: _refund_fee, executor: _executor, user_nonce: _user_nonce, broker_pubkey: _broker_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
 }
 
 function storeTupleCheckDeployment(source: CheckDeployment) {
     let builder = new TupleBuilder();
+    builder.writeNumber(source.refund_fee);
+    builder.writeAddress(source.executor);
+    builder.writeNumber(source.user_nonce);
     builder.writeCell(source.broker_pubkey);
     builder.writeNumber(source.ton_amount);
     builder.writeCell(source.jetton_payload);
@@ -814,18 +993,22 @@ function dictValueParserCheckDeployment(): DictionaryValue<CheckDeployment> {
     }
 }
 
-export type JettonPrePayInternal = {
-    $$type: 'JettonPrePayInternal';
+export type JettonPrepay = {
+    $$type: 'JettonPrepay';
+    refund_fee: bigint;
+    executor: Address;
     user_pubkey: Cell;
     ton_amount: bigint;
     jetton_payload: Cell;
     exec_payload: Cell;
 }
 
-export function storeJettonPrePayInternal(src: JettonPrePayInternal) {
+export function storeJettonPrepay(src: JettonPrepay) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeUint(711716439, 32);
+        b_0.storeUint(2496814550, 32);
+        b_0.storeCoins(src.refund_fee);
+        b_0.storeAddress(src.executor);
         b_0.storeRef(src.user_pubkey);
         b_0.storeCoins(src.ton_amount);
         b_0.storeRef(src.jetton_payload);
@@ -833,26 +1016,32 @@ export function storeJettonPrePayInternal(src: JettonPrePayInternal) {
     };
 }
 
-export function loadJettonPrePayInternal(slice: Slice) {
+export function loadJettonPrepay(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 711716439) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 2496814550) { throw Error('Invalid prefix'); }
+    let _refund_fee = sc_0.loadCoins();
+    let _executor = sc_0.loadAddress();
     let _user_pubkey = sc_0.loadRef();
     let _ton_amount = sc_0.loadCoins();
     let _jetton_payload = sc_0.loadRef();
     let _exec_payload = sc_0.asCell();
-    return { $$type: 'JettonPrePayInternal' as const, user_pubkey: _user_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
+    return { $$type: 'JettonPrepay' as const, refund_fee: _refund_fee, executor: _executor, user_pubkey: _user_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
 }
 
-function loadTupleJettonPrePayInternal(source: TupleReader) {
+function loadTupleJettonPrepay(source: TupleReader) {
+    let _refund_fee = source.readBigNumber();
+    let _executor = source.readAddress();
     let _user_pubkey = source.readCell();
     let _ton_amount = source.readBigNumber();
     let _jetton_payload = source.readCell();
     let _exec_payload = source.readCell();
-    return { $$type: 'JettonPrePayInternal' as const, user_pubkey: _user_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
+    return { $$type: 'JettonPrepay' as const, refund_fee: _refund_fee, executor: _executor, user_pubkey: _user_pubkey, ton_amount: _ton_amount, jetton_payload: _jetton_payload, exec_payload: _exec_payload };
 }
 
-function storeTupleJettonPrePayInternal(source: JettonPrePayInternal) {
+function storeTupleJettonPrepay(source: JettonPrepay) {
     let builder = new TupleBuilder();
+    builder.writeNumber(source.refund_fee);
+    builder.writeAddress(source.executor);
     builder.writeCell(source.user_pubkey);
     builder.writeNumber(source.ton_amount);
     builder.writeCell(source.jetton_payload);
@@ -860,19 +1049,22 @@ function storeTupleJettonPrePayInternal(source: JettonPrePayInternal) {
     return builder.build();
 }
 
-function dictValueParserJettonPrePayInternal(): DictionaryValue<JettonPrePayInternal> {
+function dictValueParserJettonPrepay(): DictionaryValue<JettonPrepay> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeJettonPrePayInternal(src)).endCell());
+            builder.storeRef(beginCell().store(storeJettonPrepay(src)).endCell());
         },
         parse: (src) => {
-            return loadJettonPrePayInternal(src.loadRef().beginParse());
+            return loadJettonPrepay(src.loadRef().beginParse());
         }
     }
 }
 
 export type Execute = {
     $$type: 'Execute';
+    refund_fee: bigint;
+    executor: Address;
+    user_nonce: bigint | null;
     broker_pubkey: Cell;
     exec_payload: Cell;
 }
@@ -880,7 +1072,10 @@ export type Execute = {
 export function storeExecute(src: Execute) {
     return (builder: Builder) => {
         let b_0 = builder;
-        b_0.storeUint(2391285983, 32);
+        b_0.storeUint(3238711231, 32);
+        b_0.storeCoins(src.refund_fee);
+        b_0.storeAddress(src.executor);
+        if (src.user_nonce !== null && src.user_nonce !== undefined) { b_0.storeBit(true).storeInt(src.user_nonce, 257); } else { b_0.storeBit(false); }
         b_0.storeRef(src.broker_pubkey);
         b_0.storeBuilder(src.exec_payload.asBuilder());
     };
@@ -888,20 +1083,29 @@ export function storeExecute(src: Execute) {
 
 export function loadExecute(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2391285983) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 3238711231) { throw Error('Invalid prefix'); }
+    let _refund_fee = sc_0.loadCoins();
+    let _executor = sc_0.loadAddress();
+    let _user_nonce = sc_0.loadBit() ? sc_0.loadIntBig(257) : null;
     let _broker_pubkey = sc_0.loadRef();
     let _exec_payload = sc_0.asCell();
-    return { $$type: 'Execute' as const, broker_pubkey: _broker_pubkey, exec_payload: _exec_payload };
+    return { $$type: 'Execute' as const, refund_fee: _refund_fee, executor: _executor, user_nonce: _user_nonce, broker_pubkey: _broker_pubkey, exec_payload: _exec_payload };
 }
 
 function loadTupleExecute(source: TupleReader) {
+    let _refund_fee = source.readBigNumber();
+    let _executor = source.readAddress();
+    let _user_nonce = source.readBigNumberOpt();
     let _broker_pubkey = source.readCell();
     let _exec_payload = source.readCell();
-    return { $$type: 'Execute' as const, broker_pubkey: _broker_pubkey, exec_payload: _exec_payload };
+    return { $$type: 'Execute' as const, refund_fee: _refund_fee, executor: _executor, user_nonce: _user_nonce, broker_pubkey: _broker_pubkey, exec_payload: _exec_payload };
 }
 
 function storeTupleExecute(source: Execute) {
     let builder = new TupleBuilder();
+    builder.writeNumber(source.refund_fee);
+    builder.writeAddress(source.executor);
+    builder.writeNumber(source.user_nonce);
     builder.writeCell(source.broker_pubkey);
     builder.writeSlice(source.exec_payload);
     return builder.build();
@@ -956,6 +1160,48 @@ function dictValueParserExecuteByEOA(): DictionaryValue<ExecuteByEOA> {
         },
         parse: (src) => {
             return loadExecuteByEOA(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type RefundFee = {
+    $$type: 'RefundFee';
+    init_value: bigint;
+}
+
+export function storeRefundFee(src: RefundFee) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(2000650733, 32);
+        b_0.storeCoins(src.init_value);
+    };
+}
+
+export function loadRefundFee(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 2000650733) { throw Error('Invalid prefix'); }
+    let _init_value = sc_0.loadCoins();
+    return { $$type: 'RefundFee' as const, init_value: _init_value };
+}
+
+function loadTupleRefundFee(source: TupleReader) {
+    let _init_value = source.readBigNumber();
+    return { $$type: 'RefundFee' as const, init_value: _init_value };
+}
+
+function storeTupleRefundFee(source: RefundFee) {
+    let builder = new TupleBuilder();
+    builder.writeNumber(source.init_value);
+    return builder.build();
+}
+
+function dictValueParserRefundFee(): DictionaryValue<RefundFee> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeRefundFee(src)).endCell());
+        },
+        parse: (src) => {
+            return loadRefundFee(src.loadRef().beginParse());
         }
     }
 }
@@ -1282,8 +1528,8 @@ function initLightClient_init_args(src: LightClient_init_args) {
 }
 
 async function LightClient_init(entrypoint: Address, storage_index: bigint) {
-    const __code = Cell.fromBase64('te6ccgECGwEABUYAART/APSkE/S88sgLAQIBYgIDAgLLBAUCASAPEALj0AdDTAwFxsKMB+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiFRQUwNvBPhhAvhi2zxVE9s88uCCyPhDAcx/AcoAVTBQQyDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFss/EvQAyz/J7VSFwYB76XLkGukwICgX0cw6Z/BAF11qKpbBKkQX0mpiVzIuHEK+XoB6f+TQCATQYOgmfoHN9DKAOuAmEkttvEQN1nPwLXLgJA3eWhAKAHdCXl6Rw4YC0AgKhAsQYOQt0qtrPotmExkAOeAoJn6IfEC8XRKkGulYQBFdC+BwA4C0AGSMH/gcCHXScIflTAg1wsf3iDAACLXScEhsJJbf+AgghB5Dqe3uo6zMNMfAYIQeQ6nt7ry4IH6QAEg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIIWwS2zx/4IIQlGqYtrrjAjBwBwgBSFUxgRFN+EJSUMcF8vRVIHAEIoETiKhVMCKkgROIqBBHEDZFBAkCmtMfAYIQlGqYtrry4IHTPwExyAGCEK/5D1dYyx/LP8n4QgFwbW1tIm6zmVsgbvLQgG8iAZEy4vhBbyQTXwP4J28QAaGCEDuaygC54w9/CwwC/Jcg10mBAUC+jmHTP4IAuutRVLYJUiC+k1MSuZFw4hXy9APT/yaAQCaDB0Ez9A5voZQB1wEwkltt4iBus5+Ba5cBIG7y0IBQA7oS8vSOHDAWgEBUIFiDByFulVtZ9FswmMgBzwFBM/RD4gXi6JUg10rCAIroXwNTAbyRMZEw4g4KAlpVA21wbW1tIm6zmVsgbvLQgG8iAZEy4vhBbyQTXwP4J28QAaGCEDuaygC54w8LDAHwghA7msoAcPsCECRwAwSBAIJQI8hxAcoBUAcBygBwAcoCUAUg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIzxZQA/oCcAHKaCNus5F/kyRus+KXMzMBcAHKAOMNIW6znH8BygABIG7y0IABzJUxcAHKAOLJAfsADQHcECRwAwSAQlAjyHEBygFQBwHKAHABygJQBSDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFlAD+gJwAcpoI26zkX+TJG6z4pczMwFwAcoA4w0hbrOcfwHKAAEgbvLQgAHMlTFwAcoA4skB+wANAJh/AcoAyHABygBwAcoAJG6znX8BygAEIG7y0IBQBMyWNANwAcoA4iRus51/AcoABCBu8tCAUATMljQDcAHKAOJwAcoAAn8BygACyVjMACTUAdAQSBA3RlhUd2jwGwjRVTMCASAREgIBIBMUATu6S12zxVA4BAIwKDB0Ez9A5voZQB1wEwkltt4mxBgXAQ+4j/2zwgbEGBcCAVgVFgIBSBkaAQ+w3fbPCJsQYBcAlbL0YJwXOw9XSyuex6E7DnWSoUbZoJwndY1LStkfLMi068t/fFiOYJwIFXAG4BnY5TOWDquRyWyw4JwnZdOWrNOy3M6DpZtlGbopIAHa7UTQ1AH4Y9IAAY4q+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAHTP/QE0z9VMGwU4Pgo1wsKgwm68uCJ+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAGBAQHXAFkC0QHbPBgABG1wABGwr7tRNDSAAGAAdbJu40NWlwZnM6Ly9RbWVvWENxdTVyS2ZCaUE5U0FKNlNaSHRiSldXRXA0TjV1anZvRTNKU0J2Y0Fjgg');
-    const __system = Cell.fromBase64('te6cckECHQEABVAAAQHAAQEFoXiDAgEU/wD0pBP0vPLICwMCAWIEEAICywUOAuPQB0NMDAXGwowH6QAEg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIVFBTA28E+GEC+GLbPFUT2zzy4ILI+EMBzH8BygBVMFBDINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiM8Wyz8S9ADLP8ntVIXBgLQAZIwf+BwIddJwh+VMCDXCx/eIMAAItdJwSGwklt/4CCCEHkOp7e6jrMw0x8BghB5Dqe3uvLggfpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IghbBLbPH/gghCUapi2uuMCMHAHCgFIVTGBEU34QlJQxwXy9FUgcAQigROIqFUwIqSBE4ioEEcQNkUECAL8lyDXSYEBQL6OYdM/ggC661FUtglSIL6TUxK5kXDiFfL0A9P/JoBAJoMHQTP0Dm+hlAHXATCSW23iIG6zn4FrlwEgbvLQgFADuhLy9I4cMBaAQFQgWIMHIW6VW1n0WzCYyAHPAUEz9EPiBeLolSDXSsIAiuhfA1MBvJExkTDiDwkCWlUDbXBtbW0ibrOZWyBu8tCAbyIBkTLi+EFvJBNfA/gnbxABoYIQO5rKALnjDwsMAprTHwGCEJRqmLa68uCB0z8BMcgBghCv+Q9XWMsfyz/J+EIBcG1tbSJus5lbIG7y0IBvIgGRMuL4QW8kE18D+CdvEAGhghA7msoAueMPfwsMAfCCEDuaygBw+wIQJHADBIEAglAjyHEBygFQBwHKAHABygJQBSDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFlAD+gJwAcpoI26zkX+TJG6z4pczMwFwAcoA4w0hbrOcfwHKAAEgbvLQgAHMlTFwAcoA4skB+wANAdwQJHADBIBCUCPIcQHKAVAHAcoAcAHKAlAFINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiM8WUAP6AnABymgjbrORf5MkbrPilzMzAXABygDjDSFus5x/AcoAASBu8tCAAcyVMXABygDiyQH7AA0AmH8BygDIcAHKAHABygAkbrOdfwHKAAQgbvLQgFAEzJY0A3ABygDiJG6znX8BygAEIG7y0IBQBMyWNANwAcoA4nABygACfwHKAALJWMwB76XLkGukwICgX0cw6Z/BAF11qKpbBKkQX0mpiVzIuHEK+XoB6f+TQCATQYOgmfoHN9DKAOuAmEkttvEQN1nPwLXLgJA3eWhAKAHdCXl6Rw4YC0AgKhAsQYOQt0qtrPotmExkAOeAoJn6IfEC8XRKkGulYQBFdC+BwA8AJNQB0BBIEDdGWFR3aPAbCNFVMwIBIBEUAgEgEhMBO7pLXbPFUDgEAjAoMHQTP0Dm+hlAHXATCSW23ibEGBcBD7iP/bPCBsQYFwIBIBUaAgFYFhkBD7Dd9s8ImxBgFwHa7UTQ1AH4Y9IAAY4q+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAHTP/QE0z9VMGwU4Pgo1wsKgwm68uCJ+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAGBAQHXAFkC0QHbPBgABG1wAJWy9GCcFzsPV0srnsehOw51kqFG2aCcJ3WNS0rZHyzItOvLf3xYjmCcCBVwBuAZ2OUzlg6rkclssOCcJ2XTlqzTstzOg6WbZRm6KSACAUgbHAARsK+7UTQ0gABgAHWybuNDVpcGZzOi8vUW1lb1hDcXU1cktmQmlBOVNBSjZTWkh0YkpXV0VwNE41dWp2b0UzSlNCdmNBY4IGivCmg=');
+    const __code = Cell.fromBase64('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');
+    const __system = Cell.fromBase64('te6cckECIQEABuQAAQHAAQEFoXiDAgEU/wD0pBP0vPLICwMCAWIEFAICygUSAunUB0NMDAXGwowH6QAEg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIVFBTA28E+GEC+GLbPFUU2zzy4ILI+EMBzH8BygBVQFBUINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiM8WEss/9AASyz/0AMntVIbBgTuAZIwf+BwIddJwh+VMCDXCx/eIMAAItdJwSGwklt/4CCCEHkOp7e6jrMw0x8BghB5Dqe3uvLggfpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IghbBLbPH/gIIIQdHKfQbqPCDDbPGwZ2zx/4IIQlGqYtroHCgsOAVoQRhA1RlaBEU34QlJgxwXy9FUwcAUjgROIqFVAI6SBE4ioEFgQRxA2RQRDEwkIAvyXINdJgQFAvo5h0z+CALrrUVS2CVIgvpNTErmRcOIV8vQD0/8ngEAmgwdBM/QOb6GUAdcBMJJbbeIgbrOfgWuXASBu8tCAUAO6EvL0jhwwF4BAVCBZgwchbpVbWfRbMJjIAc8BQTP0Q+IG4uiVINdKwgCK6F8DUwK8kTKRMOITCQJaVQRtcG1tbSJus5lbIG7y0IBvIgGRMuL4QW8kE18D+CdvEAGhghA7msoAueMPDxAAktMfAYIQdHKfQbry4IH6APpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IgB0//U1NM/+gDSAAGR1JJtAeJRiBgXFhUUQzACyhBNEDxLqYERTfhCUmDHBfL0gUhfIYEBASlxQTP0DG+hlAHXADCSW23ibvL0gQEBWAd/cSFulVtZ9FowmMgBzwBBM/RC4hBHEDZwcIBAJRBbBBEQBBA/TtzIVYDbPMkiEEhHZm1tDA0AloIQBgRCHVAKyx9QCPoCUAYg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIzxYUyz8SzMzLPwH6AiFus5V/AcoAzJRwMsoA4gHPFgHQyHEBygFQBwHKAHABygJQBSDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFlAD+gJwAcpoI26zkX+TJG6z4pczMwFwAcoA4w0hbrOcfwHKAAEgbvLQgAHMlTFwAcoA4skB+wBVIAQRAqSPTdMfAYIQlGqYtrry4IHTPwExyAGCEK/5D1dYyx/LP8n4QgFwbW1tIm6zmVsgbvLQgG8iAZEy4vhBbyQTXwP4J28QAaGCEDuaygC54w9/4DBwDxAB8IIQO5rKAHD7AhAkcAMEgQCCUCPIcQHKAVAHAcoAcAHKAlAFINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiM8WUAP6AnABymgjbrORf5MkbrPilzMzAXABygDjDSFus5x/AcoAASBu8tCAAcyVMXABygDiyQH7ABEB3BAkcAMEgEJQI8hxAcoBUAcBygBwAcoCUAUg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIzxZQA/oCcAHKaCNus5F/kyRus+KXMzMBcAHKAOMNIW6znH8BygABIG7y0IABzJUxcAHKAOLJAfsAEQCYfwHKAMhwAcoAcAHKACRus51/AcoABCBu8tCAUATMljQDcAHKAOIkbrOdfwHKAAQgbvLQgFAEzJY0A3ABygDicAHKAAJ/AcoAAslYzAHt1lyDXSYEBQL6OYdM/ggC661FUtglSIL6TUxK5kXDiFfL0A9P/J4BAJoMHQTP0Dm+hlAHXATCSW23iIG6zn4FrlwEgbvLQgFADuhLy9I4cMBeAQFQgWYMHIW6VW1n0WzCYyAHPAUEz9EPiBuLolSDXSsIAiuhfA4TACzUAdAQWRBIEDdGmFR3aPAgCNEQSFUzAgEgFRgCASAWFwE7uktds8VQSAQCQCgwdBM/QOb6GUAdcBMJJbbeJsUYGwEPuI/9s8IWxRgbAgEgGR4CAVgaHQEPsN32zwjbFGAbAd7tRNDUAfhj0gABjiz6QAEg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIAdM/9ATTP/QEVUBsFeD4KNcLCoMJuvLgifpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IgBgQEB1wBZAtEB2zwcAAZtcG0AlbL0YJwXOw9XSyuex6E7DnWSoUbZoJwndY1LStkfLMi068t/fFiOYJwIFXAG4BnY5TOWDquRyWyw4JwnZdOWrNOy3M6DpZtlGbopIAIBSB8gABGwr7tRNDSAAGAAdbJu40NWlwZnM6Ly9RbWFNRVlzdXA1b3Q4N1FWRjY3RE5rZVlOQW1pZlZ3S0FTQnJMc28xblZoQ3lxggGZgw0g==');
     let builder = beginCell();
     builder.storeRef(__system);
     builder.storeUint(0, 1);
@@ -1318,9 +1564,12 @@ const LightClient_errors: { [key: number]: { message: string } } = {
     136: { message: `Invalid address` },
     137: { message: `Masterchain support is not enabled for this contract` },
     4429: { message: `Invalid sender` },
+    17473: { message: `Expired` },
+    18527: { message: `Op already used` },
     27543: { message: `Block hash mismatch` },
     45716: { message: `Invalid broker` },
     47851: { message: `Block number out of range` },
+    48401: { message: `Invalid signature` },
 }
 
 const LightClient_types: ABIType[] = [
@@ -1332,16 +1581,19 @@ const LightClient_types: ABIType[] = [
     {"name":"FactoryDeploy","header":1829761339,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"Upgrade","header":1573472578,"fields":[{"name":"code","type":{"kind":"simple","type":"cell","optional":false}}]},
     {"name":"SetAdminPubkey","header":179445649,"fields":[{"name":"pubkey","type":{"kind":"simple","type":"uint","optional":false,"format":256}}]},
-    {"name":"HandleOpWithPrePay","header":2617211426,"fields":[{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"HandleOpWithJettonPrePay","header":2774263899,"fields":[{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"ValidateJettonTransfer","header":1190188753,"fields":[{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"jetton_wallet","type":{"kind":"simple","type":"address","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"PrepayAndHandleOpRequest","header":217083520,"fields":[{"name":"pay_for_jetton","type":{"kind":"simple","type":"bool","optional":false}},{"name":"valid_until","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"storage_index","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"signature","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"PrepayAndHandleOp","header":100942365,"fields":[{"name":"init_value","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"storage_index","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"HandleKontosProof","header":316013570,"fields":[]},
+    {"name":"ValidateJettonTransfer","header":3197193134,"fields":[{"name":"refund_fee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"jetton_wallet","type":{"kind":"simple","type":"address","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"UpdateBlockHeaders","header":2031003575,"fields":[{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}},{"name":"payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"PrePay","header":593867888,"fields":[{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"executor_fee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"JettonPrePay","header":2273695281,"fields":[{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"executor_fee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"CheckDeployment","header":2620465890,"fields":[{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"JettonPrePayInternal","header":711716439,"fields":[{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"Execute","header":2391285983,"fields":[{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"CheckOpHash","header":1953668929,"fields":[{"name":"init_value","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"digest","type":{"kind":"simple","type":"uint","optional":false,"format":256}},{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"RecordOpHash","header":3769419190,"fields":[{"name":"op_hash","type":{"kind":"simple","type":"uint","optional":false,"format":256}},{"name":"pubkey","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"PrePay","header":930486506,"fields":[{"name":"init_value","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"user_nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"CheckDeployment","header":337636399,"fields":[{"name":"refund_fee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"user_nonce","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"JettonPrepay","header":2496814550,"fields":[{"name":"refund_fee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"user_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"jetton_payload","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"Execute","header":3238711231,"fields":[{"name":"refund_fee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"executor","type":{"kind":"simple","type":"address","optional":false}},{"name":"user_nonce","type":{"kind":"simple","type":"int","optional":true,"format":257}},{"name":"broker_pubkey","type":{"kind":"simple","type":"cell","optional":false}},{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"ExecuteByEOA","header":4033685446,"fields":[{"name":"exec_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"RefundFee","header":2000650733,"fields":[{"name":"init_value","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"UpdatePubkey","header":1435174382,"fields":[{"name":"pubkey","type":{"kind":"simple","type":"cell","optional":false}}]},
     {"name":"JettonTransfer","header":260734629,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"destination","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}},{"name":"custom_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"forward_ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"JettonTransferNotification","header":1935855772,"fields":[{"name":"query_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"from","type":{"kind":"simple","type":"address","optional":false}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
@@ -1359,6 +1611,7 @@ const LightClient_getters: ABIGetter[] = [
 const LightClient_receivers: ABIReceiver[] = [
     {"receiver":"internal","message":{"kind":"empty"}},
     {"receiver":"internal","message":{"kind":"typed","type":"UpdateBlockHeaders"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"CheckOpHash"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
 ]
 
@@ -1392,7 +1645,7 @@ export class LightClient implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: null | UpdateBlockHeaders | Deploy) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: null | UpdateBlockHeaders | CheckOpHash | Deploy) {
         
         let body: Cell | null = null;
         if (message === null) {
@@ -1400,6 +1653,9 @@ export class LightClient implements Contract {
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'UpdateBlockHeaders') {
             body = beginCell().store(storeUpdateBlockHeaders(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'CheckOpHash') {
+            body = beginCell().store(storeCheckOpHash(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
             body = beginCell().store(storeDeploy(message)).endCell();

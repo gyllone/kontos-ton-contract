@@ -36,12 +36,14 @@ contract LightClient with BaseLightClient, Deployable {
     storage_index: Int as uint64;
     kontos_sim_headers: map<Int as uint64, Int as uint256>;
     tip: Int as uint64;
+    used_op_hash: map<Int, Bool>; // Note: key as uint256 will cause a compilation error
 
     init(entrypoint: Address, storage_index: Int) {
         self.entrypoint = entrypoint;
         self.storage_index = storage_index;
         self.kontos_sim_headers = emptyMap();
         self.tip = 0;
+        self.used_op_hash = emptyMap();
     }
 }
 
