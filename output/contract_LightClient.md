@@ -3,7 +3,7 @@ Contract: LightClient
 BOC Size: 1690 bytes
 
 # Types
-Total Types: 26
+Total Types: 28
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -37,9 +37,17 @@ Signature: `Upgrade{code:^cell}`
 TLB: `set_admin_pubkey#0ab21f91 pubkey:uint256 = SetAdminPubkey`
 Signature: `SetAdminPubkey{pubkey:uint256}`
 
+## AddBroker
+TLB: `add_broker#2ceca4d6 pubkey:^cell = AddBroker`
+Signature: `AddBroker{pubkey:^cell}`
+
+## RemoveBroker
+TLB: `remove_broker#94728a64 pubkey:^cell = RemoveBroker`
+Signature: `RemoveBroker{pubkey:^cell}`
+
 ## PrepayAndHandleOpRequest
-TLB: `prepay_and_handle_op_request#0cf06e80 pay_for_jetton:bool valid_until:uint64 storage_index:uint64 broker_pubkey:^cell user_pubkey:^cell user_nonce:uint64 ton_amount:coins payload:^cell signature:remainder<slice> = PrepayAndHandleOpRequest`
-Signature: `PrepayAndHandleOpRequest{pay_for_jetton:bool,valid_until:uint64,storage_index:uint64,broker_pubkey:^cell,user_pubkey:^cell,user_nonce:uint64,ton_amount:coins,payload:^cell,signature:remainder<slice>}`
+TLB: `prepay_and_handle_op_request#79b0c2b1 valid_until:uint64 storage_index:uint64 broker_pubkey:^cell user_pubkey:^cell user_nonce:uint64 ton_amount:coins payload:^cell signature:remainder<slice> = PrepayAndHandleOpRequest`
+Signature: `PrepayAndHandleOpRequest{valid_until:uint64,storage_index:uint64,broker_pubkey:^cell,user_pubkey:^cell,user_nonce:uint64,ton_amount:coins,payload:^cell,signature:remainder<slice>}`
 
 ## PrepayAndHandleOp
 TLB: `prepay_and_handle_op#0604421d init_value:coins executor:address storage_index:uint64 broker_pubkey:^cell user_pubkey:^cell user_nonce:uint64 ton_amount:coins jetton_payload:Maybe ^cell exec_payload:remainder<slice> = PrepayAndHandleOp`

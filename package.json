@@ -4,8 +4,7 @@
     "build": "tact --config ./tact.config.json",
     "test": "jest",
     "clean": "rm -rf ./output/*",
-    "deploy": "ts-node ./sources/contract.deploy.ts",
-    "read": "ts-node ./sources/contract.read.ts"
+    "deploy": "ts-node ./scripts/deploy/entrypoint.ts"
   },
   "dependencies": {
     "@tact-lang/compiler": "~1.4.0",

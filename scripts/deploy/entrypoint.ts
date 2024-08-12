@@ -1,7 +1,7 @@
 import { toNano } from "@ton/core";
 import { Entrypoint } from "../../output/contract_Entrypoint";
 import { Client } from "../constants";
-import { getUserKeyPair, getWalletV4 } from "../utils";
+import { getUserKeyPair, getWalletV4 } from "../utils/keypair";
 
 async function main() {
     // Parameters
@@ -12,13 +12,13 @@ async function main() {
     const entrypoint = await Entrypoint.fromInit(wallet.address);
     await Client.open(entrypoint).send(
         sender,
-        { value: toNano("0.1") },
+        { value: toNano("0.15") },
         {
             $$type: "Deploy",
             queryId: 0n,
         },
     );
-    console.log("Entrypoint", entrypoint.address.toString({ testOnly: true }));
+    console.log("Entrypoint:", entrypoint.address.toString({ testOnly: true }));
 }
 
 main().catch((error) => {

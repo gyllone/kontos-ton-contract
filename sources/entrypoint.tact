@@ -19,7 +19,26 @@ trait BaseEntrypoint with OwnableTransferable {
 
     receive(msg: SetAdminPubkey) {
         self.requireOwner();
+
         self.admin_pubkey = msg.pubkey;
+
+        self.notify(null);
+    }
+
+    receive(msg: AddBroker) {
+        self.requireOwner();
+
+        let broker: Address = self.get_smart_account_address(msg.pubkey);
+        self.broker_status.set(broker, true);
+
+        self.notify(null);
+    }
+
+    receive(msg: RemoveBroker) {
+        self.requireOwner();
+
+        let broker: Address = self.get_smart_account_address(msg.pubkey);
+        self.broker_status.del(broker);
 
         self.notify(null);
     }
@@ -31,7 +50,6 @@ trait BaseEntrypoint with OwnableTransferable {
 
         let op_hash: Int = beginCell()
             .storeAddress(myAddress())
-            .storeBool(msg.pay_for_jetton)
             .storeUint(msg.valid_until, 64)
             .storeUint(msg.storage_index, 64)
             .storeRef(msg.broker_pubkey)
@@ -48,7 +66,7 @@ trait BaseEntrypoint with OwnableTransferable {
 
         let payload: Slice = msg.payload.beginParse();
         let jetton_payload: Cell? = null;
-        if (msg.pay_for_jetton) {
+        if (payload.loadBool()) {
             jetton_payload = payload.loadRef();
         }
         let exec_payload: Cell = payload.loadRef();
@@ -64,7 +82,6 @@ trait BaseEntrypoint with OwnableTransferable {
         let fwd_fee: Int = estimate_forward_fee(origin_msg, SendPayGasSeparately);
 
         let sinit: StateInit = self.get_light_client_init(msg.storage_index);
-
         self.forward(
             contractAddress(sinit),
             CheckOpHash {

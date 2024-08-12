@@ -11,8 +11,15 @@ message SetAdminPubkey {
     pubkey: Int as uint256;
 }
 
+message AddBroker {
+    pubkey: Cell;
+}
+
+message RemoveBroker {
+    pubkey: Cell;
+}
+
 message PrepayAndHandleOpRequest {
-    pay_for_jetton: Bool;
     valid_until: Int as uint64;
     storage_index: Int as uint64;
     broker_pubkey: Cell;

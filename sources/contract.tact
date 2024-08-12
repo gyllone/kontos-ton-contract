@@ -30,7 +30,8 @@ contract Entrypoint with BaseEntrypoint, Deployable {
 }
 
 contract LightClient with BaseLightClient, Deployable {
-    override const storageReserve: Int = ton("1.0");
+    // Note: change to 1.0 on mainnet
+    override const storageReserve: Int = ton("0.5");
 
     entrypoint: Address;
     storage_index: Int as uint64;

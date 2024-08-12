@@ -18,6 +18,10 @@ trait BaseSmartAccount {
         // receive ton
     }
 
+    receive("receive or deploy") {
+        // receive ton
+    }
+
     // receive(msg: Upgrade) {
     //     self.require_entrypoint();
 

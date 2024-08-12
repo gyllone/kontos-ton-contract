@@ -9,13 +9,14 @@ export async function getUserKeyPair(): Promise<KeyPair> {
     return await mnemonicToWalletKey(mnemonics.split(" "));
 }
 
+export async function getUserKeyPair2(): Promise<KeyPair> {
+    const mnemonics = (process.env.USER_MNEMONICS2 || "").toString();
+    return await mnemonicToWalletKey(mnemonics.split(" "));
+}
+
 export async function getAdminKeyPair(): Promise<KeyPair> {
-    return await mnemonicToWalletKey([
-        "match", "skin", "settle", "wine", "salmon", "penalty",
-        "trophy", "grace", "spell", "circle", "nothing", "click",
-        "route", "bonus", "good", "coffee", "assault", "artefact",
-        "oval", "party", "junior", "width", "engage", "subway",
-    ]);
+    const mnemonics = (process.env.ADMIN_MNEMONICS || "").toString();
+    return await mnemonicToWalletKey(mnemonics.split(" "));
 }
 
 export async function getWalletV4(keyPair: KeyPair): Promise<WalletContractV4> {
