@@ -175,4 +175,8 @@ trait BaseEntrypoint with OwnableTransferable {
     abstract inline fun get_smart_account_init(pubkey: Cell): StateInit;
 
     abstract inline fun get_light_client_init(storage_index: Int): StateInit;
+
+    // === getters ===
+
+    // TODO: getters
 }

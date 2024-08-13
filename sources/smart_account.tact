@@ -237,4 +237,8 @@ trait BaseSmartAccount {
     }
 
     abstract inline fun get_smart_account_init(pubkey: Cell): StateInit;
+
+    // === getters ===
+
+    // TODO: getters
 }

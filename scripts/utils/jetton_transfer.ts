@@ -17,39 +17,41 @@ export class JettonWallet implements Contract {
     }
 
     static transferMessage(
-        jetton_amount: bigint,
+        jettonAmount: bigint,
         to: Address,
-        responseAddress:Address,
-        customPayload: Cell | null,
-        forward_ton_amount: bigint,
-        forwardPayload: Cell | null,
+        responseAddress: Address,
+        forwardTonAmount: bigint = BigInt(0),
+        customPayload?: Cell,
+        forwardPayload?: Cell,
     ) {
         return beginCell()
-            .storeUint(0xf8a7ea5, 32).storeUint(0, 64) // op, queryId
-            .storeCoins(jetton_amount).storeAddress(to)
+            .storeUint(0xf8a7ea5, 32)
+            .storeUint(0, 64) // op, queryId
+            .storeCoins(jettonAmount)
+            .storeAddress(to)
             .storeAddress(responseAddress)
             .storeMaybeRef(customPayload)
-            .storeCoins(forward_ton_amount)
+            .storeCoins(forwardTonAmount)
             .storeMaybeRef(forwardPayload)
             .endCell();
     }
 
-    async sendTransfer(
+    async transfer(
         provider: ContractProvider,
         via: Sender,
         value: bigint,
-        jetton_amount: bigint,
+        jettonAmount: bigint,
         to: Address,
-        responseAddress:Address,
-        customPayload: Cell | null,
-        forward_ton_amount: bigint,
-        forwardPayload: Cell | null,
+        responseAddress: Address,
+        forwardTonAmount: bigint = BigInt(0),
+        customPayload?: Cell,
+        forwardPayload?: Cell,
     ) {
         await provider.internal(
             via,
             {
                 sendMode: SendMode.PAY_GAS_SEPARATELY,
-                body: JettonWallet.transferMessage(jetton_amount, to, responseAddress, customPayload, forward_ton_amount, forwardPayload),
+                body: JettonWallet.transferMessage(jettonAmount, to, responseAddress, forwardTonAmount, customPayload, forwardPayload),
                 value: value
             },
         );

@@ -1,7 +1,6 @@
 import { beginCell, toNano } from "@ton/core";
 import { SmartAccount } from "../../output/contract_SmartAccount";
-import { Client, Deployments } from "../constants";
-import { P256Pubkeys } from "../utils/p256";
+import { Client, Deployments, P256Pubkeys } from "../constants";
 import { getUserKeyPair, getWalletV4 } from "../utils/keypair";
 
 async function main() {

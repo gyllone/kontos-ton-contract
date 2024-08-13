@@ -1,13 +1,13 @@
-import { Address, beginCell, Cell } from "@ton/core";
+import { Address, beginCell, Cell, SendMode } from "@ton/core";
 
 export type SendParameters = {
     bounce: boolean;
     to: Address;
     value: bigint;
-    mode: bigint;
-    body: Cell | null;
-    code: Cell | null;
-    data: Cell | null;
+    mode: SendMode;
+    body?: Cell;
+    code?: Cell;
+    data?: Cell;
 }
 
 export function build_exec_payload(params: SendParameters): Cell {
@@ -18,7 +18,7 @@ export function build_exec_payload(params: SendParameters): Cell {
         .storeAddress(params.to)
         .storeCoins(params.value)
         .storeInt(0, 1 + 4 + 4 + 64 + 32);
-    
+
     if (params.code != null || params.data != null) {
         let b = beginCell()
             .storeBit(false) // SplitDepth

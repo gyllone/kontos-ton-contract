@@ -1,28 +1,39 @@
-import { Address, beginCell, Cell, toNano } from "@ton/core";
+import { Address, beginCell, Cell, SendMode, toNano } from "@ton/core";
 import { sign } from "@ton/crypto";
 import { Entrypoint } from "../../output/contract_Entrypoint";
 import { SmartAccount } from "../../output/contract_SmartAccount";
-import { Client, Deployments } from "../constants";
-import { P256Pubkeys } from "../utils/p256";
+import { Client, Deployments, P256Pubkeys } from "../constants";
 import { getUserKeyPair, getAdminKeyPair, getWalletV4 } from "../utils/keypair";
 import { build_exec_payload } from "../utils/exec_builder";
+import { JettonWallet } from "../utils/jetton_transfer";
 
 import * as dotenv from "dotenv";
 dotenv.config();
 
-function build_send_ton_payload(
+function build_send_jetton_payload(
+    jettonWallet: Address,
+    from: Address,
     to: Address,
-    value: bigint,
-    mode: bigint = BigInt(0),
+    amount: bigint,
+    jettonGasFee: bigint = toNano("0.07"),
+    forwardTonAmount: bigint = BigInt(0),
+    customPayload?: Cell,
+    forwardPayload?: Cell,
+    mode: SendMode = SendMode.NONE,
 ): Cell {
     return build_exec_payload({
         bounce: true,
-        to: to,
-        value: value,
+        to: jettonWallet,
+        value: forwardTonAmount + jettonGasFee,
         mode: mode,
-        body: null,
-        code: null,
-        data: null,
+        body: JettonWallet.transferMessage(
+            amount,
+            to,
+            from,
+            forwardTonAmount,
+            customPayload,
+            forwardPayload,
+        ),
     });
 }
 
@@ -37,7 +48,7 @@ async function main() {
     const validUntil = BigInt(Math.ceil(Date.now() / 1000) + 5 * 60);
     const storageIndex = BigInt(0);
     const userNonce = BigInt(0);
-    const tonAmount = toNano("0.4");
+    const tonAmount = toNano("0.2");
     const brokerPubkey = beginCell()
         .storeBuffer(P256Pubkeys.Broker)
         .endCell();
@@ -45,15 +56,19 @@ async function main() {
         .storeBuffer(P256Pubkeys.User)
         .endCell();
     const jettonPayload = null;
-    // make receiver equals to broker
-    const receiver = await SmartAccount.fromInit(brokerPubkey, Deployments.Entrypoint);
-    const sendTonPayload = build_send_ton_payload(
-        receiver.address,
-        toNano("0.2"),
+    // === start building jetton transfer payload ===
+    const from = await SmartAccount.fromInit(userPubkey, Deployments.Entrypoint);
+    const to = await SmartAccount.fromInit(brokerPubkey, Deployments.Entrypoint);
+    const sendJettonPayload = build_send_jetton_payload(
+        Address.parse("kQCAAoGOGiM-Jvk5cFw_nQP9gDq0b-V0ga8lVm-yIL04ciL4"), // Note: hard code here! You should compute the jettonWallet address by yourself
+        from.address,
+        to.address,
+        100n * 1000000000n,
     );
+    // === end building jetton transfer payload ===
     const payload = beginCell()
         .storeMaybeRef(jettonPayload)
-        .storeRef(sendTonPayload)
+        .storeRef(sendJettonPayload)
         .endCell();
     const op_hash = beginCell()
         .storeAddress(Deployments.Entrypoint)
@@ -71,7 +86,7 @@ async function main() {
     const entrypoint = Entrypoint.fromAddress(Deployments.Entrypoint);
     await Client.open(entrypoint).send(
         sender,
-        { value: toNano("1") },
+        { value: toNano("0.3") },
         {
             $$type: "PrepayAndHandleOpRequest",
             valid_until: validUntil,
